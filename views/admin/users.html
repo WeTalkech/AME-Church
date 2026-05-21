@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="ame-label">A.M.E.</div><div class="church-name">ST. Joseph's Church</div><div class="admin-badge">Admin Panel</div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon"  class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event"   class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update"  class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link active super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="avatar" id="avatar-initial">A</div><div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div></div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);"><span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Manage Users</div>
+    </div>
+
+    <div class="admin-content">
+      <div id="alert" style="display:none;" class="alert"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+        <!-- Users table -->
+        <div class="admin-card">
+          <div class="admin-card-header"><h3><i class="fa fa-users"></i> Admin Accounts</h3></div>
+          <div class="admin-table-wrapper">
+            <table class="admin-table" id="users-table">
+              <thead><tr><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody id="users-body"><tr><td colspan="4" style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add user form -->
+        <div class="admin-card">
+          <div class="admin-card-header"><h3><i class="fa fa-user-plus"></i> Add New User</h3></div>
+          <div class="form-group">
+            <label for="new-username">Username *</label>
+            <input type="text" id="new-username" class="form-control" placeholder="e.g. pastor.john" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="new-password">Password *</label>
+            <div class="password-wrapper">
+              <input type="password" id="new-password" class="form-control" placeholder="Min. 8 characters" autocomplete="new-password" />
+              <button type="button" class="password-toggle" onclick="togglePw(this)" tabindex="-1"><i class="fa fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="new-role">Role *</label>
+            <select id="new-role" class="form-control">
+              <option value="editor">Editor — can create & manage posts</option>
+              <option value="super_admin">Super Admin — full access</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="addUser()">
+            <i class="fa fa-user-plus"></i> Create User
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Reset password modal -->
+<div id="reset-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:var(--radius-xl);padding:32px;width:100%;max-width:400px;margin:20px;">
+    <h3 style="margin-bottom:20px;"><i class="fa fa-key"></i> Reset Password</h3>
+    <p style="color:var(--text-mid);margin-bottom:16px;">Set a new password for <strong id="reset-username"></strong>.</p>
+    <input type="hidden" id="reset-user-id" />
+    <div class="form-group">
+      <label>New Password *</label>
+      <div class="password-wrapper">
+        <input type="password" id="reset-password" class="form-control" placeholder="Min. 8 characters" />
+        <button type="button" class="password-toggle" onclick="togglePw(this)" tabindex="-1"><i class="fa fa-eye"></i></button>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px;">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeResetModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="submitReset()">Save Password</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script>
+let currentUserId = null;
+
+(async () => {
+  await initAdminNav();
+  loadUsers();
+})();
+
+async function loadUsers() {
+  const res = await fetch('/api/admin/users').then(r => r.json()).catch(() => []);
+  const tbody = document.getElementById('users-body');
+  const authRes = await fetch('/api/auth/status').then(r => r.json());
+  currentUserId = authRes.loggedIn ? null : null;
+
+  if (!res.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-light);">No users found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = res.map(u => `
+    <tr>
+      <td><strong>${escHtml(u.username)}</strong></td>
+      <td><span class="card-type ${u.role === 'super_admin' ? 'event' : 'program'}" style="font-size:0.75rem;">${u.role === 'super_admin' ? 'Super Admin' : 'Editor'}</span></td>
+      <td style="color:var(--text-light);font-size:0.85rem;">${formatDate(u.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="openResetModal(${u.id}, '${escHtml(u.username)}')" title="Reset password"><i class="fa fa-key"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleRole(${u.id}, '${u.role}')" title="Change role"><i class="fa fa-arrows-rotate"></i></button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, this)" title="Delete user"><i class="fa fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function addUser() {
+  const username = document.getElementById('new-username').value.trim();
+  const password = document.getElementById('new-password').value;
+  const role     = document.getElementById('new-role').value;
+
+  if (!username || !password) { showAlert('Username and password are required.', 'error'); return; }
+
+  const res = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role })
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-password').value = '';
+    showAlert(`User "${username}" created successfully.`, 'success');
+    loadUsers();
+  } else {
+    showAlert(data.error || 'Failed to create user.', 'error');
+  }
+}
+
+async function deleteUser(id, btn) {
+  if (!confirm('Delete this user? They will lose access immediately.')) return;
+  btn.disabled = true;
+  const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (res.ok) {
+    showAlert('User deleted.', 'success');
+    loadUsers();
+  } else {
+    btn.disabled = false;
+    showAlert(data.error || 'Failed to delete user.', 'error');
+  }
+}
+
+async function toggleRole(id, currentRole) {
+  const newRole = currentRole === 'super_admin' ? 'editor' : 'super_admin';
+  if (!confirm(`Change this user to ${newRole === 'super_admin' ? 'Super Admin' : 'Editor'}?`)) return;
+  const res = await fetch(`/api/admin/users/${id}/role`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: newRole })
+  });
+  const data = await res.json();
+  if (res.ok) { showAlert('Role updated.', 'success'); loadUsers(); }
+  else showAlert(data.error || 'Failed to update role.', 'error');
+}
+
+function openResetModal(id, username) {
+  document.getElementById('reset-user-id').value = id;
+  document.getElementById('reset-username').textContent = username;
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-modal').style.display = 'flex';
+}
+
+function closeResetModal() {
+  document.getElementById('reset-modal').style.display = 'none';
+}
+
+async function submitReset() {
+  const id       = document.getElementById('reset-user-id').value;
+  const password = document.getElementById('reset-password').value;
+  const res = await fetch(`/api/admin/users/${id}/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  const data = await res.json();
+  if (res.ok) { closeResetModal(); showAlert('Password reset successfully.', 'success'); }
+  else showAlert(data.error || 'Failed to reset password.', 'error');
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = `alert alert-${type}`;
+  el.style.display = 'flex';
+  if (type === 'success') setTimeout(() => el.style.display = 'none', 4000);
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>

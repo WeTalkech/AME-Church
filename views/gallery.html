@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — A.M.E. ST. Joseph's Church</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/gallery.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img src="/assets/AME_Church_Logo.jpg" alt="Church Logo" class="nav-logo" />
+      <div>
+        <span class="brand-ame">African Methodist Episcopal</span>
+        <span class="brand-name">ST. Joseph's Church</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/sermons">Sermons</a></li>
+      <li><a href="/gallery" class="active">Gallery</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <h1 id="gallery-page-title">Photo Gallery</h1>
+    <p id="gallery-page-sub">Moments of worship, fellowship, and community at A.M.E. ST. Joseph's.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+
+    <!-- Event banner (shown when filtering by event) -->
+    <div id="event-banner" style="display:none; margin-bottom:24px; padding:16px 20px; background:var(--purple-light,#f3f0fa); border-left:4px solid var(--purple-mid); border-radius:var(--radius); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <span id="event-banner-text" style="font-weight:600; color:var(--purple-dark);"></span>
+      <a href="/gallery" class="btn btn-ghost btn-sm"><i class="fa fa-arrow-left"></i> All Photos</a>
+    </div>
+
+    <!-- Search -->
+    <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div style="position:relative; max-width:380px; flex:1;">
+        <i class="fa fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-light);"></i>
+        <input type="text" id="search-input" class="form-control" placeholder="Search photos..." style="padding-left:42px;" />
+      </div>
+      <span id="photo-count" style="color:var(--text-light);font-size:0.875rem;"></span>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div id="gallery-grid" class="gallery-grid">
+      <div class="loading-container"><div class="spinner"></div></div>
+    </div>
+
+    <div id="load-more-wrapper" style="text-align:center; margin-top:48px; display:none;">
+      <button id="load-more" class="btn btn-purple">Load More <i class="fa fa-chevron-down"></i></button>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" style="display:none;" class="empty-state">
+      <div class="empty-icon">🖼️</div>
+      <h3>No photos yet</h3>
+      <p>Check back soon for photos from our services and events.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" style="display:none;" role="dialog" aria-modal="true">
+  <div class="lightbox-backdrop" onclick="closeLightbox()"></div>
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close"><i class="fa fa-xmark"></i></button>
+  <button class="lightbox-prev" onclick="lightboxNav(-1)" aria-label="Previous"><i class="fa fa-chevron-left"></i></button>
+  <button class="lightbox-next" onclick="lightboxNav(1)"  aria-label="Next"><i class="fa fa-chevron-right"></i></button>
+  <div class="lightbox-content">
+    <div class="lightbox-img-wrap">
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+    <div class="lightbox-info">
+      <h3 id="lightbox-title"></h3>
+      <p  id="lightbox-caption"></p>
+      <span id="lightbox-counter" class="lightbox-counter"></span>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">A.M.E. ST. Joseph's Church</div>
+        <p>A proud congregation of the African Methodist Episcopal Church.</p>
+        <div class="social-links" style="margin-top:20px;" id="footer-social"></div>
+      </div>
+      <div class="footer-col"><h4>Quick Links</h4><ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/events">Events</a></li>
+        <li><a href="/sermons">Sermons</a></li>
+        <li><a href="/gallery">Gallery</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Services</h4><ul>
+        <li><a href="/events">Sunday School</a></li>
+        <li><a href="/events">Sunday Worship</a></li>
+        <li><a href="/events">Bible Study</a></li>
+        <li><a href="/events">Youth Ministry</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Contact Us</h4>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-location-dot"></i></span><span id="footer-address"></span></div>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-phone"></i></span><span id="footer-phone"></span></div>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-envelope"></i></span><span id="footer-email"></span></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> A.M.E. ST. Joseph's Church. All rights reserved.</span>
+      <a href="/admin/login" style="color:rgba(255,255,255,0.3);font-size:0.75rem;">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/gallery.js"></script>
+</body>
+</html>

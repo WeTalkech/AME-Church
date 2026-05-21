@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — A.M.E. ST. Joseph's</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, var(--purple-dark) 0%, #3D1060 100%); }
+    .login-card { background: var(--white); border-radius: 20px; padding: 48px 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo .cross { font-size: 2.5rem; color: var(--gold-primary); display: block; margin-bottom: 8px; }
+    .login-logo h1 { font-size: 1.2rem; color: var(--purple-dark); margin-bottom: 4px; }
+    .login-logo p { font-size: 0.8rem; color: var(--text-light); }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="cross">✝</span>
+      <h1>Admin Panel</h1>
+      <p>A.M.E. ST. Joseph's Church</p>
+    </div>
+
+    <div id="alert" style="display:none;" class="alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password"><i class="fa fa-lock"></i> Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required autocomplete="current-password" />
+          <button type="button" class="password-toggle" onclick="togglePw(this)" tabindex="-1"><i class="fa fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;" id="login-btn">
+        <i class="fa fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <div style="text-align:center; margin-top:24px;">
+      <a href="/" style="font-size:0.8rem; color:var(--text-light);"><i class="fa fa-arrow-left"></i> Back to website</a>
+    </div>
+  </div>
+
+  <script>
+    function togglePw(btn) {
+      const input = btn.previousElementSibling;
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.querySelector('i').className = show ? 'fa fa-eye-slash' : 'fa fa-eye';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const alert = document.getElementById('alert');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in...';
+      alert.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+          })
+        });
+        if (res.ok) {
+          window.location.href = '/admin/dashboard';
+        } else {
+          const data = await res.json();
+          alert.textContent = data.error || 'Login failed. Please try again.';
+          alert.className = 'alert alert-error';
+          alert.style.display = 'flex';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Sign In';
+        }
+      } catch (err) {
+        alert.textContent = 'Connection error. Please try again.';
+        alert.className = 'alert alert-error';
+        alert.style.display = 'flex';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

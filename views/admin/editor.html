@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post Editor — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<div class="admin-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="ame-label">A.M.E.</div>
+      <div class="church-name">ST. Joseph's Church</div>
+      <div class="admin-badge">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link active"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon"  class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event"   class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update"  class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="avatar-initial">A</div>
+        <div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div>
+      </div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);">
+        <span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="/admin/posts" class="btn btn-ghost btn-sm"><i class="fa fa-arrow-left"></i></a>
+        <span class="topbar-title" id="editor-title">New Post</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="savePost(0)" id="draft-btn"><i class="fa fa-file"></i> Save Draft</button>
+        <button class="btn btn-primary btn-sm" onclick="savePost(1)" id="publish-btn"><i class="fa fa-upload"></i> Publish</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <div id="alert" style="display:none;" class="alert"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;">
+
+        <!-- Main editor -->
+        <div>
+          <div class="admin-card">
+            <div class="form-group">
+              <label>Post Type *</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;" id="type-selector">
+                <button type="button" class="btn btn-ghost type-btn" data-type="sermon" onclick="setType('sermon')"><i class="fa fa-book-bible"></i> Sermon</button>
+                <button type="button" class="btn btn-ghost type-btn" data-type="event"  onclick="setType('event')"><i class="fa fa-calendar"></i> Event</button>
+                <button type="button" class="btn btn-ghost type-btn" data-type="program" onclick="setType('program')"><i class="fa fa-star"></i> Program</button>
+                <button type="button" class="btn btn-ghost type-btn" data-type="update"  onclick="setType('update')"><i class="fa fa-newspaper"></i> Update</button>
+                <button type="button" class="btn btn-ghost type-btn" data-type="gallery" onclick="setType('gallery')"><i class="fa fa-images"></i> Gallery</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="title">Title *</label>
+              <input type="text" id="title" class="form-control" placeholder="Enter post title..." oninput="autoSlug()" />
+            </div>
+
+            <div class="form-group">
+              <label for="slug">Slug (URL)</label>
+              <input type="text" id="slug" class="form-control" placeholder="auto-generated-from-title" />
+              <div class="form-hint">Used in the URL. Auto-generated from title.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="excerpt">Excerpt / Summary</label>
+              <textarea id="excerpt" class="form-control" rows="2" placeholder="Short description shown on listing pages..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Content *</label>
+              <div class="editor-toolbar">
+                <button class="toolbar-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+                <button class="toolbar-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+                <button class="toolbar-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+                <button class="toolbar-btn" onclick="fmtBlock('h3')" title="Heading">H3</button>
+                <button class="toolbar-btn" onclick="fmtBlock('p')" title="Paragraph">P</button>
+                <button class="toolbar-btn" onclick="fmt('insertUnorderedList')" title="List">• List</button>
+                <button class="toolbar-btn" onclick="fmt('insertOrderedList')" title="Numbered">1. List</button>
+                <button class="toolbar-btn" onclick="insertLink()" title="Link">🔗</button>
+              </div>
+              <div class="editor-body" id="body" contenteditable="true" spellcheck="true" placeholder="Write your content here..."></div>
+            </div>
+          </div>
+
+          <!-- Sermon-specific fields -->
+          <div class="admin-card conditional-fields" id="fields-sermon">
+            <div class="admin-card-header"><h3><i class="fa fa-book-bible"></i> Sermon Details</h3></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="scripture">Scripture Reference</label>
+                <input type="text" id="scripture" class="form-control" placeholder="e.g. John 3:16" />
+              </div>
+              <div class="form-group">
+                <label for="speaker">Speaker / Pastor</label>
+                <input type="text" id="speaker" class="form-control" placeholder="Pastor's name" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="video_url">Video URL (YouTube/Vimeo)</label>
+              <input type="url" id="video_url" class="form-control" placeholder="https://youtube.com/watch?v=..." />
+            </div>
+          </div>
+
+          <!-- Gallery-specific fields -->
+          <div class="admin-card conditional-fields" id="fields-gallery">
+            <div class="admin-card-header"><h3><i class="fa fa-images"></i> Gallery Details</h3></div>
+            <div class="form-group">
+              <label for="linked_event_id">Link to Event <span style="color:var(--text-light);font-weight:400;">(optional)</span></label>
+              <select id="linked_event_id" class="form-control">
+                <option value="">— No event —</option>
+              </select>
+              <div class="form-hint">Visitors can reach these photos directly from the linked event page.</div>
+            </div>
+          </div>
+
+          <!-- Event/Program-specific fields -->
+          <div class="admin-card conditional-fields" id="fields-event">
+            <div class="admin-card-header"><h3><i class="fa fa-calendar"></i> Event Details</h3></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date</label>
+                <div class="toggle-group" style="margin-bottom:10px;">
+                  <label class="toggle"><input type="checkbox" id="is_recurring" onchange="toggleRecurring()" /><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Recurring event</span>
+                </div>
+                <input type="date" id="event_date" class="form-control" />
+                <select id="recurrence" class="form-control" style="display:none;">
+                  <option value="">Select schedule...</option>
+                  <option value="every-sunday">Every Sunday</option>
+                  <option value="every-monday">Every Monday</option>
+                  <option value="every-tuesday">Every Tuesday</option>
+                  <option value="every-wednesday">Every Wednesday</option>
+                  <option value="every-thursday">Every Thursday</option>
+                  <option value="every-friday">Every Friday</option>
+                  <option value="every-saturday">Every Saturday</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="event_time">Time</label>
+                <input type="text" id="event_time" class="form-control" placeholder="e.g. 11:00 AM" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="event_location">Location</label>
+              <input type="text" id="event_location" class="form-control" placeholder="e.g. Main Sanctuary" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar panel -->
+        <div>
+          <div class="admin-card">
+            <div class="admin-card-header"><h3>Publish</h3></div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div>
+                <div style="font-size:0.8rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px;">Status</div>
+                <div class="toggle-group">
+                  <label class="toggle"><input type="checkbox" id="published" checked /><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Published</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px;">Homepage Feature</div>
+                <div class="toggle-group">
+                  <label class="toggle"><input type="checkbox" id="featured" /><span class="toggle-slider"></span></label>
+                  <span class="toggle-label">Featured</span>
+                </div>
+              </div>
+              <hr style="border:none;border-top:1px solid var(--border);" />
+              <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="savePost(0)"><i class="fa fa-file"></i> Save Draft</button>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="savePost(1)"><i class="fa fa-upload"></i> Publish</button>
+              <div id="delete-wrapper" style="display:none;">
+                <button class="btn btn-danger" style="width:100%;justify-content:center;" onclick="deleteCurrentPost()"><i class="fa fa-trash"></i> Delete Post</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header"><h3>Image</h3></div>
+
+            <!-- Upload from device -->
+            <div class="form-group">
+              <label>Upload from Device</label>
+              <label id="upload-label" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px dashed var(--border);border-radius:var(--radius);cursor:pointer;font-size:0.875rem;color:var(--text-mid);transition:var(--transition);" onmouseover="this.style.borderColor='var(--purple-mid)'" onmouseout="this.style.borderColor='var(--border)'">
+                <i class="fa fa-upload" id="upload-icon"></i>
+                <span id="upload-label-text">Choose image (JPG, PNG, GIF, WebP)</span>
+                <input type="file" id="image-file" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="uploadImage(this)" />
+              </label>
+              <div class="form-hint" id="upload-hint">Max 10 MB. Uploads are saved to the server.</div>
+            </div>
+
+            <!-- Or paste URL -->
+            <div class="form-group">
+              <label for="image_url">Or Paste Image URL</label>
+              <input type="url" id="image_url" class="form-control" placeholder="https://..." />
+            </div>
+
+            <div id="image-preview" style="display:none; margin-top:4px;">
+              <img id="preview-img" src="" style="width:100%;border-radius:8px;object-fit:cover;max-height:180px;" />
+              <button type="button" class="btn btn-danger btn-sm" style="margin-top:8px;width:100%;justify-content:center;" onclick="clearImage()"><i class="fa fa-times"></i> Remove Image</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/editor.js"></script>
+</body>
+</html>

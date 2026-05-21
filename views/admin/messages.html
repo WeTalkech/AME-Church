@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messages — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="ame-label">A.M.E.</div><div class="church-name">ST. Joseph's Church</div><div class="admin-badge">Admin Panel</div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon" class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event" class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update" class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link active"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="avatar" id="avatar-initial">A</div><div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div></div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);"><span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Contact Messages</div>
+    </div>
+    <div class="admin-content">
+      <div class="admin-table-wrapper">
+        <div id="messages-list"><div style="text-align:center;padding:60px;"><div class="spinner" style="margin:0 auto;"></div></div></div>
+      </div>
+
+      <!-- Message detail panel -->
+      <div id="message-detail" style="display:none; margin-top:24px;" class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h3 id="detail-subject">Message</h3>
+          <button onclick="document.getElementById('message-detail').style.display='none'" class="btn btn-ghost btn-sm">✕ Close</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;padding:16px;background:var(--bg);border-radius:var(--radius);">
+          <div><div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;margin-bottom:4px;">From</div><div style="font-weight:600;" id="detail-name"></div></div>
+          <div><div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;margin-bottom:4px;">Email</div><div id="detail-email"></div></div>
+          <div><div style="font-size:0.75rem;color:var(--text-light);text-transform:uppercase;margin-bottom:4px;">Date</div><div id="detail-date"></div></div>
+        </div>
+        <div style="line-height:1.8;color:var(--text-mid);white-space:pre-wrap;" id="detail-message"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script>
+(async () => {
+  const auth = await fetch('/api/auth/status').then(r=>r.json()).catch(()=>({loggedIn:false}));
+  if (!auth.loggedIn) { window.location.href = '/admin/login'; return; }
+  document.getElementById('username-display').textContent = auth.username || 'Admin';
+  document.getElementById('avatar-initial').textContent = (auth.username||'A')[0].toUpperCase();
+
+  loadMessages();
+})();
+
+async function loadMessages() {
+  const el = document.getElementById('messages-list');
+  const msgs = await fetch('/api/admin/messages').then(r=>r.json()).catch(()=>[]);
+  if (!msgs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-light);"><div style="font-size:2.5rem;margin-bottom:12px;">📭</div><p>No messages yet.</p></div>';
+    return;
+  }
+  el.innerHTML = `<table class="admin-table">
+    <thead><tr><th>Status</th><th>Name</th><th>Email</th><th>Subject</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>${msgs.map(m=>`
+      <tr id="msg-row-${m.id}" style="${!m.read?'font-weight:600;':''}" onclick="viewMessage(${m.id})" style="cursor:pointer;">
+        <td>${m.read ? '<span class="badge" style="background:#eee;color:#888;">Read</span>' : '<span class="badge badge-event">New</span>'}</td>
+        <td>${escHtml(m.name)}</td>
+        <td><a href="mailto:${escHtml(m.email)}" onclick="event.stopPropagation()">${escHtml(m.email)}</a></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(m.subject||'(no subject)')}</td>
+        <td style="white-space:nowrap;">${formatDate(m.created_at)}</td>
+        <td onclick="event.stopPropagation()">
+          <button onclick="deleteMessage(${m.id})" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  window._messages = msgs;
+}
+
+function viewMessage(id) {
+  const m = window._messages.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('detail-subject').textContent = m.subject || '(no subject)';
+  document.getElementById('detail-name').textContent = m.name;
+  document.getElementById('detail-email').textContent = m.email;
+  document.getElementById('detail-date').textContent = formatDate(m.created_at);
+  document.getElementById('detail-message').textContent = m.message;
+  document.getElementById('message-detail').style.display = 'block';
+  document.getElementById('message-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!m.read) {
+    fetch(`/api/admin/messages/${id}/read`, { method: 'PUT' });
+    m.read = 1;
+    const row = document.getElementById(`msg-row-${id}`);
+    if (row) { row.style.fontWeight = ''; row.querySelector('.badge').outerHTML = '<span class="badge" style="background:#eee;color:#888;">Read</span>'; }
+  }
+}
+
+async function deleteMessage(id) {
+  if (!confirm('Delete this message?')) return;
+  await fetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
+  loadMessages();
+  document.getElementById('message-detail').style.display = 'none';
+}
+</script>
+</body>
+</html>

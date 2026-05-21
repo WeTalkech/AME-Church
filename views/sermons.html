@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sermons & Updates — A.M.E. ST. Joseph's Church</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img src="/assets/AME_Church_Logo.jpg" alt="Church Logo" class="nav-logo" />
+      <div>
+        <span class="brand-ame">African Methodist Episcopal</span>
+        <span class="brand-name">ST. Joseph's Church</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/sermons" class="active">Sermons</a></li>
+      <li><a href="/gallery">Gallery</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Sermons & Updates</h1>
+    <p>Messages of hope, wisdom, and encouragement for your spiritual journey.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <!-- Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="sermon">Sermons</button>
+      <button class="filter-tab" data-filter="update">Updates</button>
+    </div>
+
+    <!-- Search -->
+    <div style="margin-bottom: 32px;">
+      <div style="position:relative; max-width: 400px;">
+        <i class="fa fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-light);"></i>
+        <input type="text" id="search-input" class="form-control" placeholder="Search sermons and updates..." style="padding-left: 42px;" />
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="sermons-grid" class="post-grid">
+      <div class="loading-container"><div class="spinner"></div></div>
+    </div>
+
+    <div id="load-more-wrapper" style="text-align: center; margin-top: 48px; display: none;">
+      <button id="load-more" class="btn btn-purple">Load More <i class="fa fa-chevron-down"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- Post Detail Modal -->
+<div id="post-modal" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.6); padding:20px; overflow-y:auto;">
+  <div style="max-width:750px; margin:40px auto; background:var(--white); border-radius:var(--radius-xl); overflow:hidden;">
+    <div id="modal-header" style="background:linear-gradient(135deg,var(--purple-mid),var(--purple-dark)); padding:32px; position:relative;">
+      <button onclick="document.getElementById('post-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;">✕</button>
+      <span id="modal-type" class="badge" style="margin-bottom:12px;"></span>
+      <h2 id="modal-title" style="color:white;"></h2>
+    </div>
+    <div id="modal-video" style="display:none;"></div>
+    <div id="modal-meta" style="padding:16px 32px; background:var(--off-white); display:flex; gap:24px; flex-wrap:wrap; font-size:0.875rem; color:var(--text-mid);"></div>
+    <div id="modal-body" style="padding:32px; line-height:1.8; color:var(--text-mid);"></div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">A.M.E. ST. Joseph's Church</div>
+        <p>A proud congregation of the African Methodist Episcopal Church.</p>
+        <div class="social-links" style="margin-top: 20px;" id="footer-social"></div>
+      </div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="/">Home</a></li><li><a href="/about">About Us</a></li><li><a href="/events">Events</a></li><li><a href="/sermons">Sermons</a></li><li><a href="/contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Services</h4><ul><li><a href="/events">Sunday School</a></li><li><a href="/events">Sunday Worship</a></li><li><a href="/events">Bible Study</a></li><li><a href="/events">Youth Ministry</a></li></ul></div>
+      <div class="footer-col"><h4>Contact Us</h4><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-location-dot"></i></span><span id="footer-address"></span></div><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-phone"></i></span><span id="footer-phone"></span></div><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-envelope"></i></span><span id="footer-email"></span></div></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> A.M.E. ST. Joseph's Church. All rights reserved.</span>
+      <a href="/admin/login" style="color: rgba(255,255,255,0.3); font-size:0.75rem;">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/sermons.js"></script>
+</body>
+</html>

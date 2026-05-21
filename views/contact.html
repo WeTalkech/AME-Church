@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — A.M.E. ST. Joseph's Church</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img src="/assets/AME_Church_Logo.jpg" alt="Church Logo" class="nav-logo" />
+      <div>
+        <span class="brand-ame">African Methodist Episcopal</span>
+        <span class="brand-name">ST. Joseph's Church</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/sermons">Sermons</a></li>
+      <li><a href="/gallery">Gallery</a></li>
+      <li><a href="/contact" class="active">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Contact Us</h1>
+    <p>We'd love to hear from you. Reach out anytime.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px;">
+
+      <!-- Contact Info -->
+      <div>
+        <h3 style="color: var(--purple-dark); margin-bottom: 8px;">Get In Touch</h3>
+        <p style="margin-bottom: 32px;">Whether you have a question, need prayer, or simply want to connect — our doors and hearts are open.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="width: 48px; height: 48px; background: var(--purple-xlight); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-mid); font-size: 1.1rem; flex-shrink: 0;">
+              <i class="fa fa-location-dot"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--text-dark); margin-bottom: 4px;">Address</div>
+              <div style="color: var(--text-mid); font-size: 0.9rem;" id="contact-address">123 Faith Avenue, Your City, State 00000</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="width: 48px; height: 48px; background: var(--purple-xlight); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-mid); font-size: 1.1rem; flex-shrink: 0;">
+              <i class="fa fa-phone"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--text-dark); margin-bottom: 4px;">Phone</div>
+              <div style="color: var(--text-mid); font-size: 0.9rem;" id="contact-phone">(000) 000-0000</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="width: 48px; height: 48px; background: var(--purple-xlight); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-mid); font-size: 1.1rem; flex-shrink: 0;">
+              <i class="fa fa-envelope"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--text-dark); margin-bottom: 4px;">Email</div>
+              <div style="color: var(--text-mid); font-size: 0.9rem;" id="contact-email">info@amestjosephs.org</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, var(--purple-dark), var(--purple-mid)); border-radius: var(--radius-lg); padding: 28px; color: var(--white);">
+          <h4 style="color: var(--gold-primary); margin-bottom: 16px; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">Service Times</h4>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+            <div style="display:flex; justify-content:space-between;"><span>Sunday School</span><span style="color:var(--gold-light);" id="ct-sunday-school">9:00 AM</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Sunday Worship</span><span style="color:var(--gold-light);" id="ct-sunday-morning">11:00 AM</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Wednesday Bible Study</span><span style="color:var(--gold-light);" id="ct-wednesday">7:00 PM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div>
+        <div style="background: var(--white); border-radius: var(--radius-xl); padding: 40px; box-shadow: var(--shadow-md);">
+          <h3 style="color: var(--purple-dark); margin-bottom: 8px;">Send Us a Message</h3>
+          <p style="margin-bottom: 28px; font-size: 0.9rem;">Fill out the form below and we'll get back to you as soon as possible.</p>
+
+          <div id="form-alert" style="display:none;"></div>
+
+          <form id="contact-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required />
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone (optional)</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="(000) 000-0000" />
+              </div>
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" class="form-control" placeholder="How can we help?" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="message">Message *</label>
+              <textarea id="message" name="message" class="form-control" placeholder="Write your message here..." rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;" id="submit-btn">
+              <i class="fa fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">A.M.E. ST. Joseph's Church</div>
+        <p>A proud congregation of the African Methodist Episcopal Church.</p>
+        <div class="social-links" style="margin-top: 20px;" id="footer-social"></div>
+      </div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="/">Home</a></li><li><a href="/about">About Us</a></li><li><a href="/events">Events</a></li><li><a href="/sermons">Sermons</a></li><li><a href="/contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Services</h4><ul><li><a href="/events">Sunday School</a></li><li><a href="/events">Sunday Worship</a></li><li><a href="/events">Bible Study</a></li><li><a href="/events">Youth Ministry</a></li></ul></div>
+      <div class="footer-col"><h4>Contact Us</h4><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-location-dot"></i></span><span id="footer-address"></span></div><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-phone"></i></span><span id="footer-phone"></span></div><div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-envelope"></i></span><span id="footer-email"></span></div></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> A.M.E. ST. Joseph's Church. All rights reserved.</span>
+      <a href="/admin/login" style="color: rgba(255,255,255,0.3); font-size:0.75rem;">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/contact.js"></script>
+</body>
+</html>

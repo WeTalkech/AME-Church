@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="ame-label">A.M.E.</div><div class="church-name">ST. Joseph's Church</div><div class="admin-badge">Admin Panel</div></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon" class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event" class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update" class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link active super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="avatar" id="avatar-initial">A</div><div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div></div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);"><span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Church Settings</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()"><i class="fa fa-save"></i> Save Changes</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <div id="alert" style="display:none;" class="alert"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+        <!-- Church Info -->
+        <div class="admin-card">
+          <div class="admin-card-header"><h3><i class="fa fa-church"></i> Church Information</h3></div>
+          <div class="form-group"><label>Church Name</label><input type="text" id="church_name" class="form-control" /></div>
+          <div class="form-group"><label>Tagline</label><input type="text" id="tagline" class="form-control" /></div>
+          <div class="form-group"><label>Address</label><input type="text" id="address" class="form-control" /></div>
+          <div class="form-group"><label>Phone</label><input type="text" id="phone" class="form-control" /></div>
+          <div class="form-group"><label>Email</label><input type="email" id="email" class="form-control" /></div>
+          <div class="form-group"><label>Founded Year</label><input type="text" id="founded_year" class="form-control" placeholder="e.g. 1958" /></div>
+        </div>
+
+        <!-- Service Times -->
+        <div>
+          <div class="admin-card">
+            <div class="admin-card-header"><h3><i class="fa fa-clock"></i> Service Times</h3></div>
+            <div class="form-group"><label>Sunday School</label><input type="text" id="service_sunday_school" class="form-control" placeholder="e.g. 9:00 AM" /></div>
+            <div class="form-group"><label>Sunday Morning Worship</label><input type="text" id="service_sunday_morning" class="form-control" placeholder="e.g. 11:00 AM" /></div>
+            <div class="form-group"><label>Wednesday Bible Study</label><input type="text" id="service_wednesday" class="form-control" placeholder="e.g. 7:00 PM" /></div>
+          </div>
+
+          <!-- Social Media -->
+          <div class="admin-card">
+            <div class="admin-card-header"><h3><i class="fa fa-share-nodes"></i> Social Media</h3></div>
+            <div class="form-group"><label>Facebook URL</label><input type="url" id="facebook_url" class="form-control" placeholder="https://facebook.com/..." /></div>
+            <div class="form-group"><label>YouTube URL</label><input type="url" id="youtube_url" class="form-control" placeholder="https://youtube.com/..." /></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- About -->
+      <div class="admin-card">
+        <div class="admin-card-header"><h3><i class="fa fa-info-circle"></i> About Text</h3></div>
+        <div class="form-group"><label>About the Church (shown on About page)</label><textarea id="about_text" class="form-control" rows="4"></textarea></div>
+      </div>
+
+      <!-- Pastor -->
+      <div class="admin-card">
+        <div class="admin-card-header"><h3><i class="fa fa-user"></i> Pastor Information</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label>Pastor Name</label><input type="text" id="pastor_name" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label>Pastor Bio</label><textarea id="pastor_bio" class="form-control" rows="3"></textarea></div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="admin-card">
+        <div class="admin-card-header"><h3><i class="fa fa-lock"></i> Change Password</h3></div>
+        <div id="pw-alert" style="display:none;" class="alert"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:end;">
+          <div class="form-group" style="margin:0;"><label>Current Password</label><div class="password-wrapper"><input type="password" id="current_password" class="form-control" /><button type="button" class="password-toggle" onclick="togglePw(this)" tabindex="-1"><i class="fa fa-eye"></i></button></div></div>
+          <div class="form-group" style="margin:0;"><label>New Password</label><div class="password-wrapper"><input type="password" id="new_password" class="form-control" /><button type="button" class="password-toggle" onclick="togglePw(this)" tabindex="-1"><i class="fa fa-eye"></i></button></div></div>
+          <button class="btn btn-ghost" onclick="changePassword()"><i class="fa fa-key"></i> Update Password</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script>
+const SETTINGS_KEYS = ['church_name','tagline','address','phone','email','founded_year',
+  'service_sunday_school','service_sunday_morning','service_wednesday',
+  'facebook_url','youtube_url','about_text','pastor_name','pastor_bio'];
+
+(async () => {
+  const auth = await fetch('/api/auth/status').then(r=>r.json()).catch(()=>({loggedIn:false}));
+  if (!auth.loggedIn) { window.location.href = '/admin/login'; return; }
+  document.getElementById('username-display').textContent = auth.username || 'Admin';
+  document.getElementById('avatar-initial').textContent = (auth.username||'A')[0].toUpperCase();
+
+  const settings = await fetch('/api/admin/settings').then(r=>r.json()).catch(()=>({}));
+  for (const key of SETTINGS_KEYS) {
+    const el = document.getElementById(key);
+    if (el && settings[key] !== undefined) el.value = settings[key];
+  }
+})();
+
+async function saveSettings() {
+  const alert = document.getElementById('alert');
+  const body = {};
+  for (const key of SETTINGS_KEYS) {
+    const el = document.getElementById(key);
+    if (el) body[key] = el.value;
+  }
+  const res = await fetch('/api/admin/settings', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (res.ok) {
+    alert.textContent = '✓ Settings saved successfully!';
+    alert.className = 'alert alert-success';
+    alert.style.display = 'flex';
+    setTimeout(() => alert.style.display = 'none', 3000);
+  } else {
+    alert.textContent = 'Error saving settings.';
+    alert.className = 'alert alert-error';
+    alert.style.display = 'flex';
+  }
+}
+
+async function changePassword() {
+  const pwAlert = document.getElementById('pw-alert');
+  const current = document.getElementById('current_password').value;
+  const newPw = document.getElementById('new_password').value;
+  if (!current || !newPw) { pwAlert.textContent='Fill in both fields.'; pwAlert.className='alert alert-error'; pwAlert.style.display='flex'; return; }
+  if (newPw.length < 6) { pwAlert.textContent='New password must be at least 6 characters.'; pwAlert.className='alert alert-error'; pwAlert.style.display='flex'; return; }
+  const res = await fetch('/api/admin/change-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ current_password: current, new_password: newPw }) });
+  if (res.ok) {
+    pwAlert.textContent = '✓ Password changed!';
+    pwAlert.className = 'alert alert-success';
+    document.getElementById('current_password').value = '';
+    document.getElementById('new_password').value = '';
+  } else {
+    const d = await res.json();
+    pwAlert.textContent = d.error || 'Error changing password.';
+    pwAlert.className = 'alert alert-error';
+  }
+  pwAlert.style.display = 'flex';
+}
+</script>
+</body>
+</html>

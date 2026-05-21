@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A.M.E. ST. Joseph's Church</title>
+  <meta name="description" content="Welcome to A.M.E. ST. Joseph's Church — Walking in Faith, Serving in Love." />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="site-nav" id="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <img src="/assets/AME_Church_Logo.jpg" alt="Church Logo" class="nav-logo" />
+      <div>
+        <span class="brand-ame">African Methodist Episcopal</span>
+        <span class="brand-name">ST. Joseph's Church</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/sermons">Sermons</a></li>
+      <li><a href="/gallery">Gallery</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">African Methodist Episcopal</div>
+    <h1>A.M.E. ST. Joseph's Church</h1>
+    <p class="tagline" id="hero-tagline">Walking in Faith, Serving in Love</p>
+    <div class="hero-actions">
+      <a href="/events" class="btn btn-primary"><i class="fa fa-calendar"></i> Upcoming Events</a>
+      <a href="/about" class="btn btn-outline"><i class="fa fa-church"></i> Learn About Us</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+
+<!-- Featured Sermon -->
+<section style="background: var(--off-white);">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">This Week's Message</span>
+      <h2>Featured Sermon</h2>
+      <div class="section-divider"><span class="section-divider-cross">✦</span></div>
+    </div>
+    <div id="featured-sermon">
+      <div class="loading-container"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming Events -->
+<section style="background: var(--white);">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">What's Happening</span>
+      <h2>Upcoming Events</h2>
+      <div class="section-divider"><span class="section-divider-cross">✦</span></div>
+    </div>
+    <div id="upcoming-events" class="post-grid">
+      <div class="loading-container"><div class="spinner"></div></div>
+    </div>
+    <div style="text-align:center; margin-top: 40px;">
+      <a href="/events" class="btn btn-purple">View All Events <i class="fa fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Updates -->
+<section style="background: var(--off-white);">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Church News</span>
+      <h2>Latest Updates</h2>
+      <div class="section-divider"><span class="section-divider-cross">✦</span></div>
+    </div>
+    <div id="latest-updates" class="post-grid">
+      <div class="loading-container"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Scripture Banner -->
+<section class="scripture-banner">
+  <div class="container">
+    <p class="scripture-text" id="scripture-text">"For I know the plans I have for you, declares the LORD, plans to prosper you and not to harm you, plans to give you hope and a future."</p>
+    <p class="scripture-ref" id="scripture-ref">— Jeremiah 29:11</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">A.M.E. ST. Joseph's Church</div>
+        <p id="footer-about">A proud congregation of the African Methodist Episcopal Church, committed to faith, community, and service.</p>
+        <div class="social-links" style="margin-top: 20px;" id="footer-social">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/events">Events</a></li>
+          <li><a href="/sermons">Sermons</a></li>
+          <li><a href="/gallery">Gallery</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="/events">Sunday School</a></li>
+          <li><a href="/events">Sunday Worship</a></li>
+          <li><a href="/events">Bible Study</a></li>
+          <li><a href="/events">Youth Ministry</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-location-dot"></i></span><span id="footer-address">123 Faith Avenue, Your City, State</span></div>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-phone"></i></span><span id="footer-phone">(000) 000-0000</span></div>
+        <div class="footer-contact-item"><span class="footer-contact-icon"><i class="fa fa-envelope"></i></span><span id="footer-email">info@amestjosephs.org</span></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> A.M.E. ST. Joseph's Church. All rights reserved.</span>
+      <a href="/admin/login" style="color: rgba(255,255,255,0.3); font-size:0.75rem;">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Post Detail Modal -->
+<div id="post-modal" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.6); padding:20px; overflow-y:auto;">
+  <div style="max-width:750px; margin:40px auto; background:var(--white); border-radius:var(--radius-xl); overflow:hidden;">
+    <div id="modal-header" style="background:linear-gradient(135deg,var(--purple-mid),var(--purple-dark)); padding:32px; position:relative;">
+      <button onclick="document.getElementById('post-modal').style.display='none';document.body.style.overflow='';" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;">✕</button>
+      <span id="modal-type" class="badge" style="margin-bottom:12px;"></span>
+      <h2 id="modal-title" style="color:white;"></h2>
+    </div>
+    <div id="modal-video" style="display:none;"></div>
+    <div id="modal-meta" style="padding:16px 32px; background:var(--off-white); display:flex; gap:24px; flex-wrap:wrap; font-size:0.875rem; color:var(--text-mid);"></div>
+    <div id="modal-body" style="padding:32px; line-height:1.8; color:var(--text-mid);"></div>
+  </div>
+</div>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/home.js"></script>
+</body>
+</html>
