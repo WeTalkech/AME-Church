@@ -48,10 +48,18 @@ async function loadPost() {
 
     // Event fields
     if (document.getElementById('is_recurring')) {
-      const isRecurring = !!post.recurrence;
+      const isRecurring = post.type === 'event' && !!post.recurrence;
       document.getElementById('is_recurring').checked = isRecurring;
       toggleRecurring();
       if (isRecurring) document.getElementById('recurrence').value = post.recurrence;
+    }
+
+    // Sermon recurring
+    if (document.getElementById('sermon_is_recurring')) {
+      const isRecurring = post.type === 'sermon' && !!post.recurrence;
+      document.getElementById('sermon_is_recurring').checked = isRecurring;
+      toggleSermonRecurring();
+      if (isRecurring) document.getElementById('sermon_recurrence').value = post.recurrence;
     }
     if (document.getElementById('event_date'))     document.getElementById('event_date').value     = post.event_date     || '';
     if (document.getElementById('event_time'))     document.getElementById('event_time').value     = post.event_time     || '';
@@ -79,6 +87,13 @@ function toggleRecurring() {
   else document.getElementById('event_date').value = '';
 }
 
+// ---- Recurring sermon toggle ----
+function toggleSermonRecurring() {
+  const isRecurring = document.getElementById('sermon_is_recurring').checked;
+  document.getElementById('sermon_recurrence').style.display = isRecurring ? 'block' : 'none';
+  if (!isRecurring) document.getElementById('sermon_recurrence').value = '';
+}
+
 // ---- Type selection ----
 let eventsLoaded = false;
 
@@ -91,7 +106,7 @@ function setType(type) {
 
   // Show/hide conditional fields
   document.getElementById('fields-sermon').classList.toggle('show', type === 'sermon');
-  document.getElementById('fields-event').classList.toggle('show',  type === 'event' || type === 'program');
+  document.getElementById('fields-event').classList.toggle('show',  type === 'event');
   document.getElementById('fields-gallery').classList.toggle('show', type === 'gallery');
 
   if (type === 'gallery' && !eventsLoaded) loadEventsDropdown();
@@ -218,7 +233,9 @@ async function savePost(published) {
     scripture:      document.getElementById('scripture')?.value.trim()     || null,
     speaker:        document.getElementById('speaker')?.value.trim()       || null,
     video_url:      document.getElementById('video_url')?.value.trim()     || null,
-    recurrence:      document.getElementById('is_recurring')?.checked ? (document.getElementById('recurrence')?.value || null) : null,
+    recurrence:      selectedType === 'sermon'
+      ? (document.getElementById('sermon_is_recurring')?.checked ? (document.getElementById('sermon_recurrence')?.value || null) : null)
+      : (document.getElementById('is_recurring')?.checked ? (document.getElementById('recurrence')?.value || null) : null),
     event_date:      document.getElementById('is_recurring')?.checked ? null : (document.getElementById('event_date')?.value || null),
     event_time:      document.getElementById('event_time')?.value.trim()     || null,
     event_location:  document.getElementById('event_location')?.value.trim() || null,

@@ -125,6 +125,23 @@
               <label for="video_url">Video URL (YouTube/Vimeo)</label>
               <input type="url" id="video_url" class="form-control" placeholder="https://youtube.com/watch?v=..." />
             </div>
+            <div class="form-group">
+              <label>Schedule</label>
+              <div class="toggle-group" style="margin-bottom:10px;">
+                <label class="toggle"><input type="checkbox" id="sermon_is_recurring" onchange="toggleSermonRecurring()" /><span class="toggle-slider"></span></label>
+                <span class="toggle-label">Recurring sermon</span>
+              </div>
+              <select id="sermon_recurrence" class="form-control" style="display:none;">
+                <option value="">Select schedule...</option>
+                <option value="every-sunday">Every Sunday</option>
+                <option value="every-monday">Every Monday</option>
+                <option value="every-tuesday">Every Tuesday</option>
+                <option value="every-wednesday">Every Wednesday</option>
+                <option value="every-thursday">Every Thursday</option>
+                <option value="every-friday">Every Friday</option>
+                <option value="every-saturday">Every Saturday</option>
+              </select>
+            </div>
           </div>
 
           <!-- Gallery-specific fields -->
