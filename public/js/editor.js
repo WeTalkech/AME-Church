@@ -62,6 +62,7 @@ async function loadPost() {
       toggleSermonRecurring();
       if (isRecurring) document.getElementById('sermon_recurrence').value = post.recurrence;
     }
+    if (document.getElementById('sermon_time'))    document.getElementById('sermon_time').value    = post.event_time     || '';
     if (document.getElementById('event_date'))     document.getElementById('event_date').value     = post.event_date     || '';
     if (document.getElementById('event_time'))     document.getElementById('event_time').value     = post.event_time     || '';
     if (document.getElementById('event_location')) document.getElementById('event_location').value = post.event_location || '';
@@ -306,7 +307,9 @@ async function savePost(published) {
       ? (document.getElementById('sermon_is_recurring')?.checked ? (document.getElementById('sermon_recurrence')?.value || null) : null)
       : (document.getElementById('is_recurring')?.checked ? (document.getElementById('recurrence')?.value || null) : null),
     event_date:      document.getElementById('is_recurring')?.checked ? null : (document.getElementById('event_date')?.value || null),
-    event_time:      document.getElementById('event_time')?.value.trim()     || null,
+    event_time:      selectedType === 'sermon'
+      ? (document.getElementById('sermon_time')?.value.trim() || null)
+      : (document.getElementById('event_time')?.value.trim()  || null),
     event_location:  document.getElementById('event_location')?.value.trim() || null,
     linked_event_id: document.getElementById('linked_event_id')?.value || null,
   };
