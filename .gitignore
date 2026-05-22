@@ -13,6 +13,9 @@ node_modules/
 logs/
 *.log
 
+# Claude Code internal files
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db

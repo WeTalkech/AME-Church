@@ -1,7 +1,7 @@
 {
   "name": "ame-st-josephs",
   "version": "1.0.0",
-  "description": "Website for A.M.E. ST. Joseph's Church",
+  "description": "Website for A.M.E. ST. Joseph Church",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

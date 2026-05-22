@@ -74,7 +74,7 @@ app.use((err, req, res, next) => {
 seedDatabase()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`A.M.E. ST. Joseph's Church website running at http://localhost:${PORT}`);
+      console.log(`A.M.E. ST. Joseph Church website running at http://localhost:${PORT}`);
       console.log(`Admin panel: http://localhost:${PORT}/admin/login`);
     });
   })

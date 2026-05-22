@@ -4,6 +4,7 @@
 
 let postId = null;
 let selectedType = null;
+let pendingGalleryImages = []; // URLs uploaded before post is saved
 
 // Detect edit mode from URL: /admin/posts/:id/edit
 const pathMatch = window.location.pathname.match(/\/admin\/posts\/(\d+)\/edit/);
@@ -109,7 +110,18 @@ function setType(type) {
   document.getElementById('fields-event').classList.toggle('show',  type === 'event');
   document.getElementById('fields-gallery').classList.toggle('show', type === 'gallery');
 
-  if (type === 'gallery' && !eventsLoaded) loadEventsDropdown();
+  // Gallery posts don't need a content body or the single-image panel
+  const isGallery = type === 'gallery';
+  document.getElementById('content-field').style.display = isGallery ? 'none' : '';
+  document.getElementById('content-label').textContent   = isGallery ? 'Content' : 'Content *';
+  document.getElementById('gallery-photos-panel').style.display = isGallery ? 'block' : 'none';
+
+  if (isGallery) {
+    if (!eventsLoaded) loadEventsDropdown();
+    document.getElementById('gallery-save-hint').style.display  = 'none';
+    document.getElementById('gallery-upload-area').style.display = 'block';
+    if (postId) loadGalleryImages();
+  }
 }
 
 async function loadEventsDropdown() {
@@ -172,7 +184,15 @@ function previewImage(url) {
 // ---- Image upload ----
 async function uploadImage(input) {
   if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
+  const files = Array.from(input.files);
+  input.value = '';
+
+  if (selectedType === 'gallery' && files.length > 1) {
+    await bulkUploadGallery(files);
+    return;
+  }
+
+  const file = files[0];
   const label = document.getElementById('upload-label-text');
   const icon  = document.getElementById('upload-icon');
   const hint  = document.getElementById('upload-hint');
@@ -201,8 +221,56 @@ async function uploadImage(input) {
     icon.className = 'fa fa-upload';
     hint.textContent = `Error: ${e.message}`;
   }
-  // Reset input so the same file can be re-selected if needed
-  input.value = '';
+}
+
+async function bulkUploadGallery(files) {
+  const label = document.getElementById('upload-label-text');
+  const icon  = document.getElementById('upload-icon');
+  const hint  = document.getElementById('upload-hint');
+
+  const linked_event_id = document.getElementById('linked_event_id')?.value || null;
+  const published = document.getElementById('published').checked ? 1 : 0;
+  const featured  = document.getElementById('featured').checked  ? 1 : 0;
+
+  let succeeded = 0;
+  let failed    = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    icon.className    = 'fa fa-spinner fa-spin';
+    label.textContent = `Uploading ${i + 1} of ${files.length}...`;
+    hint.textContent  = '';
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const uploadRes = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const { url } = await uploadRes.json();
+
+      const title = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || `Gallery Photo ${i + 1}`;
+      const postRes = await fetch('/api/admin/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'gallery', title, body: ' ', image_url: url, published, featured, linked_event_id }),
+      });
+      if (!postRes.ok) throw new Error('Post creation failed');
+      succeeded++;
+    } catch {
+      failed++;
+    }
+  }
+
+  if (failed === 0) {
+    icon.className    = 'fa fa-check';
+    label.textContent = `${succeeded} photo${succeeded !== 1 ? 's' : ''} uploaded`;
+    hint.textContent  = 'Redirecting to gallery...';
+    setTimeout(() => { window.location.href = '/admin/posts?type=gallery'; }, 1500);
+  } else {
+    icon.className    = 'fa fa-exclamation-triangle';
+    label.textContent = `${succeeded} uploaded, ${failed} failed`;
+    hint.textContent  = 'Check your connection and try again for any that failed.';
+  }
 }
 
 function clearImage() {
@@ -218,9 +286,10 @@ function clearImage() {
 async function savePost(published) {
   if (!selectedType) { showAlert('Please select a post type.', 'error'); return; }
   const title = document.getElementById('title').value.trim();
-  const body  = document.getElementById('body').innerHTML.trim();
+  const rawBody = document.getElementById('body').innerHTML.trim();
+  const body = (selectedType === 'gallery' && (!rawBody || rawBody === '<br>')) ? ' ' : rawBody;
   if (!title) { showAlert('Title is required.', 'error'); return; }
-  if (!body || body === '<br>' || body === '') { showAlert('Content is required.', 'error'); return; }
+  if (selectedType !== 'gallery' && (!body || body === '<br>' || body === '')) { showAlert('Content is required.', 'error'); return; }
 
   const payload = {
     type:    selectedType,
@@ -258,8 +327,16 @@ async function savePost(published) {
     if (res.ok) {
       const data = await res.json();
       if (!postId && data.id) {
-        // Redirect to edit page after create
-        window.location.href = `/admin/posts/${data.id}/edit`;
+        if (selectedType === 'gallery' && pendingGalleryImages.length) {
+          await fetch(`/api/admin/posts/${data.id}/images/batch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls: pendingGalleryImages }),
+          });
+        }
+        window.location.href = selectedType === 'gallery'
+          ? `/admin/posts/${data.id}/edit`
+          : `/admin/posts/new`;
         return;
       }
       showAlert(published ? '✓ Post published!' : '✓ Saved as draft!', 'success');
@@ -273,6 +350,126 @@ async function savePost(published) {
 
   publishBtn.disabled = false;
   draftBtn.disabled   = false;
+}
+
+// ---- Gallery image management ----
+async function loadGalleryImages() {
+  const grid = document.getElementById('gallery-photos-grid');
+  try {
+    const res = await fetch(`/api/admin/posts/${postId}/images`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || res.statusText);
+    renderGalleryGrid(json.images || []);
+  } catch(e) {
+    grid.innerHTML = `<p style="color:var(--error-color,#c0392b);font-size:0.875rem;">Failed to load photos: ${e.message}</p>`;
+  }
+}
+
+function renderGalleryGrid(images) {
+  const grid = document.getElementById('gallery-photos-grid');
+  if (!images || !images.length) {
+    grid.innerHTML = '<p style="color:var(--text-light);font-size:0.875rem;grid-column:1/-1;">No photos yet. Upload some above.</p>';
+    return;
+  }
+  grid.innerHTML = images.map(img => `
+    <div style="position:relative;border-radius:6px;overflow:hidden;aspect-ratio:1;">
+      <img src="${img.image_url.replace(/"/g,'&quot;')}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
+      <button onclick="setGalleryCover(${img.id},this)" title="Set as cover" style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.55);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><i class="fa fa-star" style="font-size:11px;"></i></button>
+      <button onclick="removeGalleryImage(${img.id},this)" title="Remove photo" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><i class="fa fa-times" style="font-size:11px;"></i></button>
+    </div>`).join('');
+}
+
+async function galleryUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const files = Array.from(input.files);
+  input.value = '';
+
+  const label = document.getElementById('gallery-upload-label');
+  const icon  = document.getElementById('gallery-upload-icon');
+  const hint  = document.getElementById('gallery-upload-hint');
+  let failed = 0;
+  const uploadedUrls = [];
+
+  // Step 1: upload all files to storage first
+  for (let i = 0; i < files.length; i++) {
+    icon.className    = 'fa fa-spinner fa-spin';
+    label.textContent = `Uploading ${i + 1} of ${files.length}...`;
+    try {
+      const formData = new FormData();
+      formData.append('image', files[i]);
+      const uploadRes = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${uploadRes.status}`);
+      }
+      const { url } = await uploadRes.json();
+      uploadedUrls.push(url);
+    } catch(e) {
+      failed++;
+      hint.textContent = `Error on "${files[i].name}": ${e.message}`;
+    }
+  }
+
+  // Step 2: single batch insert into DB
+  if (uploadedUrls.length) {
+    if (postId) {
+      label.textContent = 'Saving to album...';
+      const batchRes = await fetch(`/api/admin/posts/${postId}/images/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: uploadedUrls }),
+      });
+      if (!batchRes.ok) {
+        const err = await batchRes.json().catch(() => ({}));
+        showAlert(`Photos uploaded but not saved: ${err.error || 'unknown error'}`, 'error');
+      }
+    } else {
+      pendingGalleryImages.push(...uploadedUrls);
+    }
+  }
+
+  icon.className    = failed ? 'fa fa-exclamation-triangle' : 'fa fa-check';
+  label.textContent = 'Add Photos — select multiple';
+  hint.textContent  = failed
+    ? `${uploadedUrls.length} uploaded, ${failed} failed.`
+    : `${uploadedUrls.length} photo${uploadedUrls.length !== 1 ? 's' : ''} uploaded.`;
+
+  if (postId) await loadGalleryImages();
+  else renderPendingGrid();
+
+  setTimeout(() => { hint.textContent = 'Max 25 MB per photo. First photo becomes the album cover.'; icon.className = 'fa fa-upload'; }, 3000);
+}
+
+function renderPendingGrid() {
+  const grid = document.getElementById('gallery-photos-grid');
+  if (!pendingGalleryImages.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = pendingGalleryImages.map((url, i) => `
+    <div style="position:relative;border-radius:6px;overflow:hidden;aspect-ratio:1;">
+      <img src="${url.replace(/"/g,'&quot;')}" style="width:100%;height:100%;object-fit:cover;" />
+      <button onclick="removePendingImage(${i})" title="Remove" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><i class="fa fa-times" style="font-size:11px;"></i></button>
+    </div>`).join('');
+}
+
+function removePendingImage(index) {
+  pendingGalleryImages.splice(index, 1);
+  renderPendingGrid();
+}
+
+async function removeGalleryImage(imageId, btn) {
+  btn.disabled = true;
+  const res = await fetch(`/api/admin/gallery-images/${imageId}`, { method: 'DELETE' });
+  if (res.ok) {
+    await loadGalleryImages();
+  } else {
+    btn.disabled = false;
+    showAlert('Failed to remove photo.', 'error');
+  }
+}
+
+async function setGalleryCover(imageId) {
+  const res = await fetch(`/api/admin/gallery-images/${imageId}/cover`, { method: 'PUT' });
+  if (res.ok) showAlert('Cover photo updated!', 'success');
+  else showAlert('Failed to update cover.', 'error');
 }
 
 async function deleteCurrentPost() {

@@ -9,7 +9,7 @@ const supabase = createClient(
 async function seedDatabase() {
   // Seed default site settings
   const defaults = [
-    ['church_name',            "A.M.E. ST. Joseph's Church"],
+    ['church_name',            "A.M.E. ST. Joseph Church"],
     ['tagline',                'Walking in Faith, Serving in Love'],
     ['address',                'Cnr of Bougaard and, Kearns St, Rabiesdale, Paarl, 7646'],
     ['phone',                  '(000) 000-0000'],
@@ -19,7 +19,7 @@ async function seedDatabase() {
     ['service_wednesday',      '7:00 PM'],
     ['facebook_url',           ''],
     ['youtube_url',            ''],
-    ['about_text',             "A.M.E. ST. Joseph's Church is a proud congregation of the African Methodist Episcopal Church, one of the oldest and most historic Black denominations in the United States. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action."],
+    ['about_text',             "A.M.E. ST. Joseph Church is a proud congregation of the African Methodist Episcopal Church, one of the oldest and most historic Black denominations in the United States. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action."],
     ['pastor_name',            'Pastor Name'],
     ['pastor_bio',             'Our pastor leads our congregation with wisdom, compassion, and a deep commitment to the Gospel.'],
     ['founded_year',           ''],

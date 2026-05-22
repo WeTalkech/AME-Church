@@ -20,7 +20,7 @@ const contactLimiter = rateLimit({
 // Multer — memory storage (files go to Supabase Storage, not disk)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 25 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -86,6 +86,105 @@ router.get('/posts/:slug', async (req, res) => {
     .single();
   if (error || !post) return res.status(404).json({ error: 'Post not found' });
   res.json(post);
+});
+
+// GET /api/gallery/albums — gallery albums with photo counts and linked event names
+router.get('/gallery/albums', async (req, res) => {
+  const { limit = 18, offset = 0 } = req.query;
+
+  const { data: posts, count, error } = await supabase
+    .from('church_posts')
+    .select('id, title, slug, excerpt, image_url, linked_event_id', { count: 'exact' })
+    .eq('type', 'gallery')
+    .eq('published', 1)
+    .order('created_at', { ascending: false })
+    .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!posts || !posts.length) return res.json({ albums: [], total: 0 });
+
+  const postIds = posts.map(p => p.id);
+
+  // Photo counts from church_gallery_images
+  const { data: imageCounts } = await supabase
+    .from('church_gallery_images')
+    .select('post_id')
+    .in('post_id', postIds);
+
+  const countMap = {};
+  for (const row of (imageCounts || [])) {
+    countMap[row.post_id] = (countMap[row.post_id] || 0) + 1;
+  }
+
+  // Linked event titles
+  const eventIds = [...new Set(posts.filter(p => p.linked_event_id).map(p => p.linked_event_id))];
+  let eventMap = {};
+  if (eventIds.length) {
+    const { data: events } = await supabase.from('church_posts').select('id, title').in('id', eventIds);
+    for (const e of (events || [])) eventMap[e.id] = e.title;
+  }
+
+  const albums = posts.map(p => ({
+    ...p,
+    photo_count: countMap[p.id] || 0,
+    event_title: p.linked_event_id ? (eventMap[p.linked_event_id] || null) : null,
+  }));
+
+  res.json({ albums, total: count || 0 });
+});
+
+// GET /api/gallery/photos — flat list of all individual photos across all published albums
+router.get('/gallery/photos', async (req, res) => {
+  const { limit = 50, offset = 0 } = req.query;
+  const lim = parseInt(limit);
+  const off = parseInt(offset);
+
+  // Get all published gallery posts
+  const { data: posts } = await supabase
+    .from('church_posts')
+    .select('id, title, slug, image_url')
+    .eq('type', 'gallery')
+    .eq('published', 1)
+    .order('created_at', { ascending: false });
+
+  if (!posts || !posts.length) return res.json({ photos: [], total: 0 });
+
+  const postIds = posts.map(p => p.id);
+  const postMap = Object.fromEntries(posts.map(p => [p.id, p]));
+
+  // Try fetching from church_gallery_images
+  const { data: images, error, count } = await supabase
+    .from('church_gallery_images')
+    .select('id, image_url, post_id', { count: 'exact' })
+    .in('post_id', postIds)
+    .order('created_at', { ascending: false })
+    .range(off, off + lim - 1);
+
+  if (!error && images && images.length) {
+    const photos = images.map(img => ({
+      id: img.id,
+      image_url: img.image_url,
+      album_title: postMap[img.post_id]?.title || '',
+      album_slug:  postMap[img.post_id]?.slug  || '',
+    }));
+    return res.json({ photos, total: count || 0 });
+  }
+
+  // Fallback: use cover photos from the gallery posts themselves
+  const fallback = posts.filter(p => p.image_url);
+  const page = fallback.slice(off, off + lim).map(p => ({
+    id: p.id, image_url: p.image_url, album_title: p.title, album_slug: p.slug,
+  }));
+  res.json({ photos: page, total: fallback.length });
+});
+
+// GET /api/posts/:slug/images — public: all photos in a gallery album
+router.get('/posts/:slug/images', async (req, res) => {
+  const { data: post } = await supabase.from('church_posts').select('id').eq('slug', req.params.slug).eq('published', 1).single();
+  if (!post) return res.status(404).json({ error: 'Not found' });
+  const { data, error } = await supabase.from('church_gallery_images').select('id, image_url').eq('post_id', post.id).order('sort_order').order('created_at');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ images: data || [] });
 });
 
 // GET /api/public/settings
@@ -260,6 +359,48 @@ router.put('/admin/messages/:id/read', requireAuthAPI, async (req, res) => {
 router.delete('/admin/messages/:id', requireAuthAPI, async (req, res) => {
   await supabase.from('church_contact_messages').delete().eq('id', req.params.id);
   res.json({ success: true });
+});
+
+// GET /api/admin/posts/:id/images
+router.get('/admin/posts/:id/images', requireAuthAPI, async (req, res) => {
+  const { data, error } = await supabase.from('church_gallery_images').select('id, image_url').eq('post_id', req.params.id).order('sort_order').order('created_at');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ images: data || [] });
+});
+
+// POST /api/admin/posts/:id/images/batch — add multiple images in one DB call
+router.post('/admin/posts/:id/images/batch', requireAuthAPI, async (req, res) => {
+  const { urls } = req.body;
+  if (!Array.isArray(urls) || !urls.length) return res.status(400).json({ error: 'urls array is required' });
+  const rows = urls.map(image_url => ({ post_id: parseInt(req.params.id), image_url }));
+  const { data, error } = await supabase.from('church_gallery_images').insert(rows).select('id, image_url');
+  if (error) return res.status(500).json({ error: error.message });
+  // Set cover photo if the album has none yet
+  const { data: post } = await supabase.from('church_posts').select('image_url').eq('id', req.params.id).single();
+  if (!post?.image_url && urls[0]) await supabase.from('church_posts').update({ image_url: urls[0] }).eq('id', req.params.id);
+  res.status(201).json({ images: data || [] });
+});
+
+// DELETE /api/admin/gallery-images/:imageId
+router.delete('/admin/gallery-images/:imageId', requireAuthAPI, async (req, res) => {
+  const { data: img } = await supabase.from('church_gallery_images').select('post_id, image_url').eq('id', req.params.imageId).single();
+  if (!img) return res.status(404).json({ error: 'Image not found' });
+  const { error } = await supabase.from('church_gallery_images').delete().eq('id', req.params.imageId);
+  if (error) return res.status(500).json({ error: error.message });
+  const { data: post } = await supabase.from('church_posts').select('image_url').eq('id', img.post_id).single();
+  if (post?.image_url === img.image_url) {
+    const { data: next } = await supabase.from('church_gallery_images').select('image_url').eq('post_id', img.post_id).order('created_at').limit(1);
+    await supabase.from('church_posts').update({ image_url: next?.[0]?.image_url || null }).eq('id', img.post_id);
+  }
+  res.json({ ok: true });
+});
+
+// PUT /api/admin/gallery-images/:imageId/cover — set as album cover photo
+router.put('/admin/gallery-images/:imageId/cover', requireAuthAPI, async (req, res) => {
+  const { data: img } = await supabase.from('church_gallery_images').select('post_id, image_url').eq('id', req.params.imageId).single();
+  if (!img) return res.status(404).json({ error: 'Image not found' });
+  await supabase.from('church_posts').update({ image_url: img.image_url }).eq('id', img.post_id);
+  res.json({ ok: true });
 });
 
 // POST /api/admin/upload — upload to Supabase Storage

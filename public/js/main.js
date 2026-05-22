@@ -1,5 +1,5 @@
 // ============================================================
-// A.M.E. ST. Joseph's — Shared / Global JavaScript
+// A.M.E. ST. Joseph — Shared / Global JavaScript
 // ============================================================
 
 // Nav toggle (mobile)

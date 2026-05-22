@@ -1,5 +1,5 @@
 -- ============================================================
--- AME St. Joseph's Church — Supabase Schema
+-- AME St. Joseph Church — Supabase Schema
 -- Run this entire file in your Supabase SQL Editor
 -- (Dashboard → SQL Editor → New query → paste → Run)
 -- ============================================================
@@ -60,6 +60,16 @@ CREATE INDEX IF NOT EXISTS idx_church_session_expire ON church_session (expire);
 -- Link gallery photos to an event post
 ALTER TABLE church_posts ADD COLUMN IF NOT EXISTS linked_event_id BIGINT REFERENCES church_posts(id) ON DELETE SET NULL;
 
+-- Gallery album images (many photos per gallery post)
+CREATE TABLE IF NOT EXISTS church_gallery_images (
+  id         BIGSERIAL PRIMARY KEY,
+  post_id    BIGINT NOT NULL REFERENCES church_posts(id) ON DELETE CASCADE,
+  image_url  TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE church_gallery_images DISABLE ROW LEVEL SECURITY;
+
 -- Indexes for frequently filtered/sorted columns
 CREATE INDEX IF NOT EXISTS idx_church_posts_type        ON church_posts (type);
 CREATE INDEX IF NOT EXISTS idx_church_posts_published   ON church_posts (published);
@@ -68,6 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_church_posts_created_at  ON church_posts (created
 CREATE INDEX IF NOT EXISTS idx_church_posts_featured    ON church_posts (featured);
 CREATE INDEX IF NOT EXISTS idx_church_messages_read      ON church_contact_messages (read);
 CREATE INDEX IF NOT EXISTS idx_church_posts_linked_event ON church_posts (linked_event_id);
+CREATE INDEX IF NOT EXISTS idx_gallery_images_post ON church_gallery_images (post_id, sort_order);
 
 CREATE OR REPLACE FUNCTION get_post_stats()
 RETURNS TABLE(sermons BIGINT, events BIGINT, updates BIGINT, programs BIGINT, gallery BIGINT, total BIGINT) AS $$
