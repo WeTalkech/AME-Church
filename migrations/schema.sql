@@ -92,6 +92,19 @@ RETURNS TABLE(sermons BIGINT, events BIGINT, updates BIGINT, programs BIGINT, ga
   FROM church_posts;
 $$ LANGUAGE SQL;
 
+-- Hymnal
+CREATE TABLE IF NOT EXISTS church_hymns (
+  id         BIGSERIAL PRIMARY KEY,
+  number     INTEGER NOT NULL UNIQUE,
+  title      TEXT NOT NULL,
+  author     TEXT,
+  lyrics     TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_church_hymns_number ON church_hymns (number);
+ALTER TABLE church_hymns DISABLE ROW LEVEL SECURITY;
+
 ALTER TABLE church_users              DISABLE ROW LEVEL SECURITY;
 ALTER TABLE church_posts              DISABLE ROW LEVEL SECURITY;
 ALTER TABLE church_contact_messages   DISABLE ROW LEVEL SECURITY;

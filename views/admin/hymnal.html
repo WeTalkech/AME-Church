@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hymnal — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .hymn-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0,0,0,0.5);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .hymn-modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .hymn-modal {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      width: 100%;
+      max-width: 680px;
+      margin-top: 40px;
+    }
+    .hymn-modal h2 { margin: 0 0 24px; font-size: 1.25rem; color: var(--text-dark); }
+    .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+    .lyrics-textarea { min-height: 280px; font-family: Georgia, serif; font-size: 0.9rem; line-height: 1.8; resize: vertical; }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="ame-label">A.M.E.</div>
+      <div class="church-name">ST. Joseph Church</div>
+      <div class="admin-badge">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon"  class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event"   class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update"  class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <a href="/admin/hymnal" class="sidebar-link active"><span class="icon"><i class="fa fa-music"></i></span> Hymnal</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="avatar-initial">A</div>
+        <div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div>
+      </div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);">
+        <span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Hymnal</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal()"><i class="fa fa-plus"></i> Add Hymn</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Search bar -->
+      <div style="display:flex;gap:12px;margin-bottom:24px;align-items:center;">
+        <div style="position:relative;flex:1;max-width:360px;">
+          <i class="fa fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-light);font-size:0.85rem;"></i>
+          <input type="text" id="hymn-search" class="form-control" placeholder="Search hymns…" style="padding-left:36px;" />
+        </div>
+        <span id="hymn-count" style="color:var(--text-light);font-size:0.875rem;"></span>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <div id="hymn-list">
+          <div style="text-align:center;padding:60px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="hymn-modal-overlay" id="modal-overlay">
+  <div class="hymn-modal">
+    <h2 id="modal-title">Add Hymn</h2>
+    <input type="hidden" id="edit-id" />
+    <div class="form-row" style="margin-bottom:16px;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Hymn Number *</label>
+        <input type="number" id="f-number" class="form-control" min="1" max="999" placeholder="e.g. 126" />
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Author</label>
+        <input type="text" id="f-author" class="form-control" placeholder="e.g. Charles Wesley" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title *</label>
+      <input type="text" id="f-title" class="form-control" placeholder="Hymn title" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Lyrics <span style="color:var(--text-light);font-weight:400;">(optional — paste full text, use blank lines between verses)</span></label>
+      <textarea id="f-lyrics" class="form-control lyrics-textarea" placeholder="Verse 1&#10;...&#10;&#10;Chorus&#10;...&#10;&#10;Verse 2&#10;..."></textarea>
+    </div>
+    <div id="modal-error" style="color:#e53e3e;font-size:0.875rem;display:none;margin-bottom:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveHymn()">Save Hymn</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/admin-hymnal.js"></script>
+</body>
+</html>

@@ -48,11 +48,13 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 const authRouter  = require('./routes/auth');
 const postsRouter = require('./routes/posts');
 const usersRouter = require('./routes/users');
+const hymnsRouter = require('./routes/hymns');
 const pagesRouter = require('./routes/pages');
 
 app.use('/api/auth',         authRouter);
 app.use('/api/admin/users',  usersRouter);
 app.use('/api',              postsRouter);
+app.use('/api',              hymnsRouter);
 app.use('/',                 pagesRouter);
 
 // 404 handler

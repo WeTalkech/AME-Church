@@ -1,5 +1,6 @@
 ﻿const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
+const hymnData = require('./data/hymns');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -27,6 +28,16 @@ async function seedDatabase() {
 
   for (const [key, value] of defaults) {
     await supabase.from('church_site_settings').upsert({ key, value }, { onConflict: 'key', ignoreDuplicates: true });
+  }
+
+  // Seed hymns if table is empty
+  const { count: hymnCount } = await supabase.from('church_hymns').select('*', { count: 'exact', head: true });
+  if (hymnCount === 0) {
+    const rows = hymnData.map(([number, title]) => ({ number, title }));
+    for (let i = 0; i < rows.length; i += 50) {
+      await supabase.from('church_hymns').insert(rows.slice(i, i + 50));
+    }
+    console.log(`Seeded ${rows.length} hymns`);
   }
 
   // Seed default super_admin if no users exist

@@ -12,6 +12,7 @@ router.get('/events',    (req, res) => res.sendFile(views('events.html')));
 router.get('/sermons',   (req, res) => res.sendFile(views('sermons.html')));
 router.get('/contact',   (req, res) => res.sendFile(views('contact.html')));
 router.get('/gallery',   (req, res) => res.sendFile(views('gallery.html')));
+router.get('/hymnal',    (req, res) => res.sendFile(views('hymnal.html')));
 
 router.get('/robots.txt', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'robots.txt')));
 
@@ -39,5 +40,6 @@ router.get('/admin/posts/:id/edit',requireAuth,           (req, res) => res.send
 router.get('/admin/messages',      requireAuth,           (req, res) => res.sendFile(views('admin/messages.html')));
 router.get('/admin/settings',      requireSuperAdminPage, (req, res) => res.sendFile(views('admin/settings.html')));
 router.get('/admin/users',         requireSuperAdminPage, (req, res) => res.sendFile(views('admin/users.html')));
+router.get('/admin/hymnal',        requireAuth,           (req, res) => res.sendFile(views('admin/hymnal.html')));
 
 module.exports = router;
