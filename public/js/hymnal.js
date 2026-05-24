@@ -41,17 +41,8 @@ async function selectHymn(id) {
   activeId = id;
   renderList();
 
-  const layout = document.querySelector('.hymnal-layout');
   const detail = document.getElementById('hymnal-detail');
-  const mobile = isMobile();
-  const alreadyOpen = layout.classList.contains('detail-open');
-
-  if (mobile && !alreadyOpen) {
-    layout.classList.add('detail-open');
-    history.pushState({ hymnalDetail: true }, '');
-  } else if (mobile) {
-    layout.classList.add('detail-open');
-  }
+  const alreadyOpen = detail.classList.contains('visible');
 
   detail.innerHTML = `
     ${backBtn()}
@@ -60,6 +51,11 @@ async function selectHymn(id) {
         <div class="spinner" style="margin:0 auto;"></div>
       </div>
     </div>`;
+  detail.classList.add('visible');
+
+  if (isMobile() && !alreadyOpen) {
+    history.pushState({ hymnalDetail: true }, '');
+  }
 
   const hymn = await fetch(`/api/hymns/${id}`).then(r => r.json()).catch(() => null);
   if (!hymn) {
@@ -90,15 +86,15 @@ async function selectHymn(id) {
 }
 
 function closeMobileDetail() {
-  document.querySelector('.hymnal-layout').classList.remove('detail-open');
+  document.getElementById('hymnal-detail').classList.remove('visible');
   if (history.state && history.state.hymnalDetail) {
     history.back();
   }
 }
 
-// Hardware back button closes the detail view instead of leaving the page
+// Hardware back button closes the overlay instead of leaving the page
 window.addEventListener('popstate', function () {
-  document.querySelector('.hymnal-layout').classList.remove('detail-open');
+  document.getElementById('hymnal-detail').classList.remove('visible');
 });
 
 document.getElementById('hymn-search').addEventListener('input', function () {

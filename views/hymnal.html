@@ -162,18 +162,23 @@
       }
       .hymn-list { max-height: calc(100dvh - 200px); }
       .hymn-list-item { padding: 14px 16px; }
-      /* Default: sidebar visible, detail hidden */
-      .hymnal-detail { display: none; }
-      /* When a hymn is open: swap to detail view */
-      .hymnal-layout.detail-open .hymnal-sidebar { display: none; }
-      .hymnal-layout.detail-open .hymnal-detail {
-        display: flex;
+      .hymnal-detail {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1001; /* above the fixed nav (z-index: 1000) */
+        background: var(--white);
         flex-direction: column;
-        min-height: 70vh;
+        animation: slideUp 0.22s ease;
       }
+      .hymnal-detail.visible { display: flex; }
       .hymnal-detail-scroll { flex: 1; overflow-y: auto; }
       .hymnal-detail-inner { padding: 24px 20px 48px; }
       .hymn-detail-title { font-size: 1.4rem; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
   </style>
 </head>
