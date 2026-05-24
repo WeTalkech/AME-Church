@@ -1,8 +1,9 @@
 // Hymnal public page
-let allHymns = [];
+let allHymns  = [];
 let activeId  = null;
 let searchTimer = null;
-const isMobile = () => window.innerWidth <= 768;
+
+function isMobile() { return window.innerWidth <= 768; }
 
 async function loadHymns(search = '') {
   const url = `/api/hymns?limit=600${search ? '&search=' + encodeURIComponent(search) : ''}`;
@@ -32,36 +33,38 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function backBar() {
-  // Always inject with explicit inline display so it's never hidden by CSS
-  return `<div class="mobile-back" style="display:flex;" onclick="closeMobileDetail()">
-    <i class="fa fa-arrow-left"></i> Back to list
-  </div>`;
+function backBtn() {
+  return `<div class="mobile-back" onclick="closeMobileDetail()"><i class="fa fa-arrow-left"></i> Back to list</div>`;
 }
 
 async function selectHymn(id) {
   activeId = id;
   renderList();
 
+  const layout = document.querySelector('.hymnal-layout');
   const detail = document.getElementById('hymnal-detail');
-  const alreadyOpen = detail.classList.contains('visible');
+  const mobile = isMobile();
+  const alreadyOpen = layout.classList.contains('detail-open');
 
-  detail.innerHTML = `${isMobile() ? backBar() : ''}
+  if (mobile && !alreadyOpen) {
+    layout.classList.add('detail-open');
+    history.pushState({ hymnalDetail: true }, '');
+  } else if (mobile) {
+    layout.classList.add('detail-open');
+  }
+
+  detail.innerHTML = `
+    ${backBtn()}
     <div class="hymnal-detail-scroll">
       <div class="hymnal-detail-inner" style="text-align:center;padding-top:60px;">
         <div class="spinner" style="margin:0 auto;"></div>
       </div>
     </div>`;
-  detail.classList.add('visible');
-
-  // Push a history entry so the hardware back button closes the panel
-  if (isMobile() && !alreadyOpen) {
-    history.pushState({ hymnalDetail: true }, '');
-  }
 
   const hymn = await fetch(`/api/hymns/${id}`).then(r => r.json()).catch(() => null);
   if (!hymn) {
-    detail.innerHTML = `${isMobile() ? backBar() : ''}
+    detail.innerHTML = `
+      ${backBtn()}
       <div class="hymnal-detail-scroll">
         <div class="hymnal-detail-inner"><p style="color:var(--text-light);">Failed to load hymn.</p></div>
       </div>`;
@@ -69,7 +72,7 @@ async function selectHymn(id) {
   }
 
   detail.innerHTML = `
-    ${isMobile() ? backBar() : ''}
+    ${backBtn()}
     <div class="hymnal-detail-scroll">
       <div class="hymnal-detail-inner">
         <div class="hymn-detail-number">Hymn No. ${hymn.number}</div>
@@ -82,33 +85,25 @@ async function selectHymn(id) {
       </div>
     </div>`;
 
-  // Scroll lyrics area back to top
   const scroll = detail.querySelector('.hymnal-detail-scroll');
   if (scroll) scroll.scrollTop = 0;
 }
 
 function closeMobileDetail() {
-  document.getElementById('hymnal-detail').classList.remove('visible');
-  // If we pushed a history entry, consume it so the back button goes to the real previous page
+  document.querySelector('.hymnal-layout').classList.remove('detail-open');
   if (history.state && history.state.hymnalDetail) {
     history.back();
   }
 }
 
-// Hardware / browser back button
+// Hardware back button closes the detail view instead of leaving the page
 window.addEventListener('popstate', function () {
-  const detail = document.getElementById('hymnal-detail');
-  if (detail.classList.contains('visible')) {
-    detail.classList.remove('visible');
-    // Don't call history.back() here — the browser already popped the entry
-  }
+  document.querySelector('.hymnal-layout').classList.remove('detail-open');
 });
 
-// Search with debounce
 document.getElementById('hymn-search').addEventListener('input', function () {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => loadHymns(this.value.trim()), 300);
 });
 
-// Init
 loadHymns();

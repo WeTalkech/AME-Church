@@ -136,60 +136,44 @@
       padding: 8px 16px;
       border-top: 1px solid var(--border);
     }
+    /* Back button — shown by default, hidden on desktop */
+    .mobile-back {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--purple-mid);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 16px 20px;
+      background: var(--off-white);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    @media (min-width: 769px) {
+      .mobile-back { display: none; }
+      .hymnal-detail-inner { height: 100%; }
+    }
     @media (max-width: 768px) {
       .hymnal-layout {
         grid-template-columns: 1fr;
         border-radius: var(--radius-lg);
         min-height: unset;
       }
-      .hymnal-sidebar {
-        height: 100%;
-      }
-      .hymn-list {
-        max-height: calc(100dvh - 220px);
-      }
-      .hymn-list-item {
-        padding: 14px 16px;
-      }
-      .hymnal-detail {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 500;
-        background: var(--white);
+      .hymn-list { max-height: calc(100dvh - 200px); }
+      .hymn-list-item { padding: 14px 16px; }
+      /* Default: sidebar visible, detail hidden */
+      .hymnal-detail { display: none; }
+      /* When a hymn is open: swap to detail view */
+      .hymnal-layout.detail-open .hymnal-sidebar { display: none; }
+      .hymnal-layout.detail-open .hymnal-detail {
+        display: flex;
         flex-direction: column;
-        animation: slideUp 0.22s ease;
+        min-height: 70vh;
       }
-      .hymnal-detail.visible { display: flex; }
-      .mobile-back {
-        align-items: center;
-        gap: 10px;
-        color: var(--purple-mid);
-        cursor: pointer;
-        font-size: 0.95rem;
-        font-weight: 600;
-        padding: 16px 20px;
-        background: var(--off-white);
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
-      }
-      .hymnal-detail-scroll {
-        flex: 1;
-        overflow-y: auto;
-      }
-      .hymnal-detail-inner {
-        padding: 24px 20px 48px;
-      }
-      .hymn-detail-title {
-        font-size: 1.4rem;
-      }
-    }
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    @media (min-width: 769px) {
-      .hymnal-detail-inner { height: 100%; }
+      .hymnal-detail-scroll { flex: 1; overflow-y: auto; }
+      .hymnal-detail-inner { padding: 24px 20px 48px; }
+      .hymn-detail-title { font-size: 1.4rem; }
     }
   </style>
 </head>
