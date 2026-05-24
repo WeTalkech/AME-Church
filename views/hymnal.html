@@ -76,8 +76,10 @@
       line-height: 1.3;
     }
     .hymnal-detail {
-      padding: 40px;
       overflow-y: auto;
+    }
+    .hymnal-detail-inner {
+      padding: 40px;
     }
     .hymnal-detail-empty {
       display: flex;
@@ -137,22 +139,59 @@
     @media (max-width: 768px) {
       .hymnal-layout {
         grid-template-columns: 1fr;
+        border-radius: var(--radius-lg);
+        min-height: unset;
       }
-      .hymnal-detail { display: none; }
-      .hymnal-detail.visible { display: block; }
-      .hymn-list { max-height: 60vh; }
+      .hymnal-sidebar {
+        height: 100%;
+      }
+      .hymn-list {
+        max-height: calc(100dvh - 220px);
+      }
+      .hymn-list-item {
+        padding: 14px 16px;
+      }
+      .hymnal-detail {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: var(--white);
+        flex-direction: column;
+        animation: slideUp 0.22s ease;
+      }
+      .hymnal-detail.visible { display: flex; }
       .mobile-back {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         color: var(--purple-mid);
         cursor: pointer;
-        font-size: 0.875rem;
-        margin-bottom: 20px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 16px 20px;
+        background: var(--off-white);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
       }
+      .hymnal-detail-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .hymnal-detail-inner {
+        padding: 24px 20px 48px;
+      }
+      .hymn-detail-title {
+        font-size: 1.4rem;
+      }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
     @media (min-width: 769px) {
       .mobile-back { display: none; }
+      .hymnal-detail-inner { height: 100%; }
     }
   </style>
 </head>

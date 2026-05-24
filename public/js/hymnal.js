@@ -36,7 +36,7 @@ async function selectHymn(id) {
   renderList();
 
   const detail = document.getElementById('hymnal-detail');
-  detail.innerHTML = '<div style="text-align:center;padding:60px;"><div class="spinner" style="margin:0 auto;"></div></div>';
+  detail.innerHTML = '<span class="mobile-back" onclick="closeMobileDetail()"><i class="fa fa-arrow-left"></i> Back to list</span><div class="hymnal-detail-scroll"><div class="hymnal-detail-inner" style="text-align:center;padding-top:60px;"><div class="spinner" style="margin:0 auto;"></div></div></div>';
   detail.classList.add('visible');
 
   const hymn = await fetch(`/api/hymns/${id}`).then(r => r.json()).catch(() => null);
@@ -47,13 +47,17 @@ async function selectHymn(id) {
 
   detail.innerHTML = `
     <span class="mobile-back" onclick="closeMobileDetail()"><i class="fa fa-arrow-left"></i> Back to list</span>
-    <div class="hymn-detail-number">Hymn No. ${hymn.number}</div>
-    <div class="hymn-detail-title">${escHtml(hymn.title)}</div>
-    ${hymn.author ? `<div class="hymn-detail-author"><i class="fa fa-pen-nib" style="margin-right:6px;"></i>${escHtml(hymn.author)}</div>` : ''}
-    ${hymn.lyrics
-      ? `<div class="hymn-lyrics">${escHtml(hymn.lyrics)}</div>`
-      : `<div class="hymn-no-lyrics"><i class="fa fa-info-circle" style="margin-right:6px;"></i>Lyrics not yet added for this hymn.</div>`
-    }
+    <div class="hymnal-detail-scroll">
+      <div class="hymnal-detail-inner">
+        <div class="hymn-detail-number">Hymn No. ${hymn.number}</div>
+        <div class="hymn-detail-title">${escHtml(hymn.title)}</div>
+        ${hymn.author ? `<div class="hymn-detail-author"><i class="fa fa-pen-nib" style="margin-right:6px;"></i>${escHtml(hymn.author)}</div>` : ''}
+        ${hymn.lyrics
+          ? `<div class="hymn-lyrics">${escHtml(hymn.lyrics)}</div>`
+          : `<div class="hymn-no-lyrics"><i class="fa fa-info-circle" style="margin-right:6px;"></i>Lyrics not yet added for this hymn.</div>`
+        }
+      </div>
+    </div>
   `;
 
   // Scroll detail panel to top
