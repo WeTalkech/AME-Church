@@ -1,11 +1,32 @@
 // Admin Hymnal page
 let searchTimer = null;
+let activeSection = '';
+
+async function loadSections() {
+  const data = await fetch('/api/hymn-sections').then(r => r.json()).catch(() => ({ sections: [] }));
+  const sections = data.sections || [];
+  const dl = document.getElementById('section-options');
+  if (dl) dl.innerHTML = sections.map(s => `<option value="${escHtml(s.name)}">`).join('');
+  const filter = document.getElementById('section-filter');
+  if (filter && sections.length) {
+    filter.innerHTML = '<option value="">All categories</option>' +
+      sections.map(s => `<option value="${escHtml(s.name)}">${escHtml(s.name)} (${s.count})</option>`).join('');
+    filter.style.display = '';
+    filter.addEventListener('change', () => {
+      activeSection = filter.value;
+      loadHymns(document.getElementById('hymn-search').value.trim());
+    });
+  }
+}
 
 async function loadHymns(search = '') {
   const el = document.getElementById('hymn-list');
   el.innerHTML = '<div style="text-align:center;padding:60px;"><div class="spinner" style="margin:0 auto;"></div></div>';
 
-  const url = `/api/admin/hymns?limit=600${search ? '&search=' + encodeURIComponent(search) : ''}`;
+  const params = new URLSearchParams({ limit: '1000' });
+  if (search) params.set('search', search);
+  if (activeSection) params.set('section', activeSection);
+  const url = `/api/admin/hymns?${params}`;
   const data = await fetch(url).then(r => r.json()).catch(() => ({ hymns: [] }));
   const hymns = data.hymns || [];
 
@@ -20,11 +41,12 @@ async function loadHymns(search = '') {
   }
 
   el.innerHTML = `<table class="admin-table">
-    <thead><tr><th style="width:60px;">#</th><th>Title</th><th>Author</th><th>Lyrics</th><th>Actions</th></tr></thead>
+    <thead><tr><th style="width:60px;">#</th><th>Title</th><th>Category</th><th>Author</th><th>Lyrics</th><th>Actions</th></tr></thead>
     <tbody>${hymns.map(h => `
       <tr>
         <td style="font-weight:700;color:var(--purple-mid);">${h.number}</td>
         <td style="font-weight:600;color:var(--text-dark);">${escHtml(h.title)}</td>
+        <td style="color:var(--text-light);">${escHtml(h.section || 'Hymns')}</td>
         <td style="color:var(--text-light);">${escHtml(h.author || '—')}</td>
         <td>${h.lyrics
           ? '<span class="badge badge-published">Added</span>'
@@ -44,6 +66,7 @@ function openModal(hymn = null) {
   document.getElementById('f-number').value            = hymn ? hymn.number : '';
   document.getElementById('f-title').value             = hymn ? hymn.title  : '';
   document.getElementById('f-author').value            = hymn ? (hymn.author || '') : '';
+  document.getElementById('f-section').value            = hymn ? (hymn.section || 'Hymns') : (activeSection || 'Hymns');
   document.getElementById('f-lyrics').value            = hymn ? (hymn.lyrics || '') : '';
   document.getElementById('modal-error').style.display = 'none';
   document.getElementById('modal-overlay').classList.add('open');
@@ -64,6 +87,7 @@ async function saveHymn() {
   const number = document.getElementById('f-number').value.trim();
   const title  = document.getElementById('f-title').value.trim();
   const author = document.getElementById('f-author').value.trim();
+  const section = document.getElementById('f-section').value.trim() || 'Hymns';
   const lyrics = document.getElementById('f-lyrics').value.trim();
   const errEl  = document.getElementById('modal-error');
 
@@ -77,7 +101,7 @@ async function saveHymn() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
-  const body    = { number: parseInt(number), title, author: author || null, lyrics: lyrics || null };
+  const body    = { number: parseInt(number), title, author: author || null, lyrics: lyrics || null, section };
   const url     = id ? `/api/admin/hymns/${id}` : '/api/admin/hymns';
   const method  = id ? 'PUT' : 'POST';
 
@@ -124,5 +148,6 @@ document.getElementById('hymn-search').addEventListener('input', function () {
 // Init
 (async () => {
   await initAdminNav();
+  await loadSections();
   loadHymns();
 })();

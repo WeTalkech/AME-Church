@@ -2,12 +2,37 @@
 let allHymns  = [];
 let activeId  = null;
 let searchTimer = null;
+let activeSection = null;   // null = all languages
 
 function isMobile() { return window.innerWidth <= 768; }
 
+async function loadSections() {
+  const el = document.getElementById('hymnal-tabs');
+  if (!el) return;
+  const data = await fetch('/api/hymn-sections').then(r => r.json()).catch(() => ({ sections: [] }));
+  const sections = data.sections || [];
+  // Only worth showing a tab strip once there is more than one language
+  if (sections.length < 2) { el.style.display = 'none'; return; }
+  const total = sections.reduce((n, s) => n + s.count, 0);
+  el.innerHTML =
+    `<button class="hymnal-tab${activeSection === null ? ' active' : ''}" data-section="">All <span class="tab-count">${total}</span></button>` +
+    sections.map(s =>
+      `<button class="hymnal-tab${activeSection === s.name ? ' active' : ''}" data-section="${escHtml(s.name)}">` +
+      `${escHtml(s.name)} <span class="tab-count">${s.count}</span></button>`).join('');
+  el.querySelectorAll('.hymnal-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSection = btn.dataset.section || null;
+      el.querySelectorAll('.hymnal-tab').forEach(b => b.classList.toggle('active', b === btn));
+      loadHymns(document.getElementById('hymn-search').value.trim());
+    });
+  });
+}
+
 async function loadHymns(search = '') {
-  const url = `/api/hymns?limit=600${search ? '&search=' + encodeURIComponent(search) : ''}`;
-  const data = await fetch(url).then(r => r.json()).catch(() => ({ hymns: [] }));
+  const params = new URLSearchParams({ limit: '1000' });
+  if (search) params.set('search', search);
+  if (activeSection) params.set('section', activeSection);
+  const data = await fetch(`/api/hymns?${params}`).then(r => r.json()).catch(() => ({ hymns: [] }));
   allHymns = data.hymns || [];
   renderList();
   document.getElementById('hymnal-count').textContent =
@@ -20,10 +45,12 @@ function renderList() {
     el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);">No hymns found.</div>';
     return;
   }
+  const mixed = !activeSection && new Set(allHymns.map(h => h.section)).size > 1;
   el.innerHTML = allHymns.map(h => `
     <div class="hymn-list-item${h.id === activeId ? ' active' : ''}" data-id="${h.id}" onclick="selectHymn(${h.id})">
       <span class="hymn-num">${h.number}</span>
-      <span class="hymn-name">${escHtml(h.title)}</span>
+      <span class="hymn-name">${escHtml(h.title)}${mixed && h.section && h.section !== 'Hymns'
+        ? ` <small style="color:var(--text-light);">· ${escHtml(h.section)}</small>` : ''}</span>
     </div>
   `).join('');
 }
@@ -71,7 +98,7 @@ async function selectHymn(id) {
     ${backBtn()}
     <div class="hymnal-detail-scroll">
       <div class="hymnal-detail-inner">
-        <div class="hymn-detail-number">Hymn No. ${hymn.number}</div>
+        <div class="hymn-detail-number">${hymn.section && hymn.section !== 'Hymns' ? escHtml(hymn.section) + ' No. ' : 'Hymn No. '}${hymn.number}</div>
         <div class="hymn-detail-title">${escHtml(hymn.title)}</div>
         ${hymn.author ? `<div class="hymn-detail-author"><i class="fa fa-pen-nib" style="margin-right:6px;"></i>${escHtml(hymn.author)}</div>` : ''}
         ${hymn.lyrics
@@ -102,4 +129,5 @@ document.getElementById('hymn-search').addEventListener('input', function () {
   searchTimer = setTimeout(() => loadHymns(this.value.trim()), 300);
 });
 
+loadSections();
 loadHymns();

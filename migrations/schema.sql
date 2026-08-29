@@ -102,7 +102,28 @@ CREATE TABLE IF NOT EXISTS church_hymns (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- Each language section carries its own numbering, restarting at 1.
+ALTER TABLE church_hymns ADD COLUMN IF NOT EXISTS section TEXT NOT NULL DEFAULT 'Hymns';
+ALTER TABLE church_hymns DROP CONSTRAINT IF EXISTS church_hymns_number_key;
+CREATE UNIQUE INDEX IF NOT EXISTS church_hymns_number_section_key ON church_hymns (number, section);
 CREATE INDEX IF NOT EXISTS idx_church_hymns_number ON church_hymns (number);
+-- Ordering rank so English hymns lead and other languages follow alphabetically.
+ALTER TABLE church_hymns ADD COLUMN IF NOT EXISTS section_rank SMALLINT NOT NULL DEFAULT 1;
+
+CREATE OR REPLACE FUNCTION church_hymns_set_section_rank()
+RETURNS TRIGGER AS $
+BEGIN
+  NEW.section_rank := CASE WHEN NEW.section = 'Hymns' THEN 0 ELSE 1 END;
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_church_hymns_section_rank ON church_hymns;
+CREATE TRIGGER trg_church_hymns_section_rank
+  BEFORE INSERT OR UPDATE OF section ON church_hymns
+  FOR EACH ROW EXECUTE FUNCTION church_hymns_set_section_rank();
+
+CREATE INDEX IF NOT EXISTS idx_church_hymns_section ON church_hymns (section_rank, section, number);
 ALTER TABLE church_hymns DISABLE ROW LEVEL SECURITY;
 
 ALTER TABLE church_users              DISABLE ROW LEVEL SECURITY;

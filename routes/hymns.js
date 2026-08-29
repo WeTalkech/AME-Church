@@ -9,13 +9,16 @@ const router = express.Router();
 
 // GET /api/hymns?search=&limit=&offset=
 router.get('/hymns', async (req, res) => {
-  const { search, limit = 50, offset = 0 } = req.query;
+  const { search, section, limit = 50, offset = 0 } = req.query;
   let query = supabase
     .from('church_hymns')
-    .select('id, number, title, author', { count: 'exact' })
+    .select('id, number, title, author, section', { count: 'exact' })
+    .order('section_rank', { ascending: true })
+    .order('section', { ascending: true })
     .order('number', { ascending: true })
     .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
+  if (section) query = query.eq('section', section);
   if (search) {
     query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
   }
@@ -23,6 +26,18 @@ router.get('/hymns', async (req, res) => {
   const { data, count, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json({ hymns: data || [], total: count || 0 });
+});
+
+// GET /api/hymn-sections — the language categories, with counts
+router.get('/hymn-sections', async (req, res) => {
+  const { data, error } = await supabase.from('church_hymns').select('section');
+  if (error) return res.status(500).json({ error: error.message });
+  const counts = {};
+  for (const row of (data || [])) counts[row.section] = (counts[row.section] || 0) + 1;
+  const sections = Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => (a.name === 'Hymns' ? -1 : b.name === 'Hymns' ? 1 : a.name.localeCompare(b.name)));
+  res.json({ sections });
 });
 
 // GET /api/hymns/:id — full hymn with lyrics
@@ -42,13 +57,16 @@ router.get('/hymns/:id', async (req, res) => {
 
 // GET /api/admin/hymns
 router.get('/admin/hymns', requireAuthAPI, async (req, res) => {
-  const { search, limit = 100, offset = 0 } = req.query;
+  const { search, section, limit = 100, offset = 0 } = req.query;
   let query = supabase
     .from('church_hymns')
-    .select('id, number, title, author, lyrics', { count: 'exact' })
+    .select('id, number, title, author, lyrics, section', { count: 'exact' })
+    .order('section_rank', { ascending: true })
+    .order('section', { ascending: true })
     .order('number', { ascending: true })
     .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
+  if (section) query = query.eq('section', section);
   if (search) query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
 
   const { data, count, error } = await query;
@@ -58,12 +76,13 @@ router.get('/admin/hymns', requireAuthAPI, async (req, res) => {
 
 // POST /api/admin/hymns
 router.post('/admin/hymns', requireAuthAPI, async (req, res) => {
-  const { number, title, author, lyrics } = req.body;
+  const { number, title, author, lyrics, section } = req.body;
   if (!number || !title) return res.status(400).json({ error: 'Number and title are required' });
 
   const { data, error } = await supabase
     .from('church_hymns')
-    .insert({ number: parseInt(number), title, author: author || null, lyrics: lyrics || null })
+    .insert({ number: parseInt(number), title, author: author || null, lyrics: lyrics || null,
+              section: section || 'Hymns' })
     .select('id')
     .single();
 
@@ -73,7 +92,7 @@ router.post('/admin/hymns', requireAuthAPI, async (req, res) => {
 
 // PUT /api/admin/hymns/:id
 router.put('/admin/hymns/:id', requireAuthAPI, async (req, res) => {
-  const { number, title, author, lyrics } = req.body;
+  const { number, title, author, lyrics, section } = req.body;
 
   const { data: existing } = await supabase.from('church_hymns').select('*').eq('id', req.params.id).single();
   if (!existing) return res.status(404).json({ error: 'Hymn not found' });
@@ -83,6 +102,7 @@ router.put('/admin/hymns/:id', requireAuthAPI, async (req, res) => {
     title:      title  ?? existing.title,
     author:     author !== undefined ? (author || null) : existing.author,
     lyrics:     lyrics !== undefined ? (lyrics || null) : existing.lyrics,
+    section:    section || existing.section,
     updated_at: new Date().toISOString(),
   }).eq('id', req.params.id);
 
