@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sunday Program — Admin</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .program-drop {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 24px;
+      text-align: center;
+      background: var(--off-white);
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .program-drop.dragover { border-color: var(--gold-primary); background: #FFFCF5; }
+    .program-drop .drop-icon { font-size: 2.5rem; color: var(--text-light); margin-bottom: 12px; }
+    .program-current {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold-primary);
+      border-radius: var(--radius);
+      background: var(--white);
+      margin-bottom: 24px;
+    }
+    .program-current .pdf-icon { font-size: 2rem; color: #C0392B; }
+    .program-empty {
+      padding: 20px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-light);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="ame-label">A.M.E.</div>
+      <div class="church-name">ST. Joseph Church</div>
+      <div class="admin-badge">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <a href="/admin/dashboard" class="sidebar-link"><span class="icon"><i class="fa fa-gauge"></i></span> Dashboard</a>
+      <a href="/admin/posts/new" class="sidebar-link"><span class="icon"><i class="fa fa-plus"></i></span> New Post</a>
+      <div class="sidebar-section">Content</div>
+      <a href="/admin/posts" class="sidebar-link"><span class="icon"><i class="fa fa-list"></i></span> All Posts</a>
+      <a href="/admin/posts?type=sermon"  class="sidebar-link"><span class="icon"><i class="fa fa-book-bible"></i></span> Sermons</a>
+      <a href="/admin/posts?type=event"   class="sidebar-link"><span class="icon"><i class="fa fa-calendar"></i></span> Events</a>
+      <a href="/admin/posts?type=program" class="sidebar-link"><span class="icon"><i class="fa fa-star"></i></span> Programs</a>
+      <a href="/admin/posts?type=update"  class="sidebar-link"><span class="icon"><i class="fa fa-newspaper"></i></span> Updates</a>
+      <a href="/admin/posts?type=gallery" class="sidebar-link"><span class="icon"><i class="fa fa-images"></i></span> Gallery</a>
+      <a href="/admin/hymnal" class="sidebar-link"><span class="icon"><i class="fa fa-music"></i></span> Hymnal</a>
+      <a href="/admin/program" class="sidebar-link active"><span class="icon"><i class="fa fa-file-pdf"></i></span> Sunday Program</a>
+      <div class="sidebar-section">Manage</div>
+      <a href="/admin/messages" class="sidebar-link"><span class="icon"><i class="fa fa-envelope"></i></span> Messages</a>
+      <a href="/admin/users"    class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-users"></i></span> Users</a>
+      <a href="/admin/settings" class="sidebar-link super-admin-only"><span class="icon"><i class="fa fa-gear"></i></span> Settings</a>
+      <div class="sidebar-section">Site</div>
+      <a href="/" target="_blank" class="sidebar-link"><span class="icon"><i class="fa fa-globe"></i></span> View Website</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="avatar-initial">A</div>
+        <div><div class="user-name" id="username-display">Admin</div><div class="user-role" id="user-role-label">Admin</div></div>
+      </div>
+      <button onclick="logout()" class="sidebar-link" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;color:rgba(255,255,255,0.6);">
+        <span class="icon"><i class="fa fa-right-from-bracket"></i></span> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Sunday Program</div>
+    </div>
+
+    <div class="admin-content">
+      <div id="alert" style="display:none;" class="alert"></div>
+
+      <div class="admin-card" style="max-width:720px;">
+        <div class="admin-card-header"><h3><i class="fa fa-file-pdf"></i> This Week&rsquo;s Program</h3></div>
+        <p style="color:var(--text-light);font-size:0.875rem;margin-bottom:20px;">
+          Publish the Sunday service program in either form &mdash; type it out below, upload a PDF, or do both.
+          It opens from the <strong>See Program</strong> button on the homepage.
+        </p>
+
+        <div id="current-state"><div class="program-empty">Loading&hellip;</div></div>
+
+        <div class="form-group">
+          <label>Program date <span style="color:var(--text-light);font-weight:400;">(optional &mdash; shown on the homepage)</span></label>
+          <input type="date" id="program-date" class="form-control" style="max-width:260px;" />
+        </div>
+
+        <div class="form-group">
+          <label>Program content <span style="color:var(--text-light);font-weight:400;">(type the order of service here)</span></label>
+          <div class="editor-toolbar">
+            <button type="button" class="toolbar-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+            <button type="button" class="toolbar-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+            <button type="button" class="toolbar-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+            <button type="button" class="toolbar-btn" onclick="fmtBlock('h3')" title="Heading">H3</button>
+            <button type="button" class="toolbar-btn" onclick="fmtBlock('p')" title="Paragraph">P</button>
+            <button type="button" class="toolbar-btn" onclick="fmt('insertUnorderedList')" title="List">&bull; List</button>
+            <button type="button" class="toolbar-btn" onclick="fmt('insertOrderedList')" title="Numbered">1. List</button>
+          </div>
+          <div class="editor-body" id="program-content" contenteditable="true" spellcheck="true"></div>
+          <small style="color:var(--text-light);">Leave empty to publish a PDF only.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Program PDF <span style="color:var(--text-light);font-weight:400;">(optional)</span></label>
+        </div>
+
+        <div class="program-drop" id="drop-zone">
+          <div class="drop-icon"><i class="fa fa-file-arrow-up"></i></div>
+          <p style="margin-bottom:14px;color:var(--text-mid);">Drag a PDF here, or choose a file</p>
+          <input type="file" id="program-file" accept="application/pdf,.pdf" style="display:none;" onchange="uploadProgram(this.files[0])" />
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('program-file').click()">
+            <i class="fa fa-upload"></i> Choose PDF
+          </button>
+          <p id="upload-hint" style="margin-top:14px;color:var(--text-light);font-size:0.85rem;">PDF only, up to 25&nbsp;MB.</p>
+        </div>
+
+        <div style="margin-top:24px;display:flex;gap:12px;align-items:center;">
+          <button class="btn btn-primary" onclick="saveProgram()"><i class="fa fa-floppy-disk"></i> Save Program</button>
+          <button class="btn btn-danger" id="remove-btn" onclick="removeProgram()" style="display:none;">
+            <i class="fa fa-trash"></i> Remove program
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/admin-program.js"></script>
+</body>
+</html>

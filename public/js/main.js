@@ -57,6 +57,24 @@ async function loadFooterInfo() {
     ['ct-sunday-school', 'st-sunday-school'].forEach(id => { const el = document.getElementById(id); if (el && s.service_sunday_school) el.textContent = s.service_sunday_school; });
     ['ct-sunday-morning', 'st-sunday-morning'].forEach(id => { const el = document.getElementById(id); if (el && s.service_sunday_morning) el.textContent = s.service_sunday_morning; });
     ['ct-wednesday', 'st-wednesday'].forEach(id => { const el = document.getElementById(id); if (el && s.service_wednesday) el.textContent = s.service_wednesday; });
+    // Sunday service program (homepage) — hidden until content or a PDF is published.
+    // Typed content gets its own page; a PDF on its own opens directly.
+    const programLink = document.getElementById('service-program-link');
+    if (programLink && (s.sunday_program_has_content || s.sunday_program_url)) {
+      programLink.href = s.sunday_program_has_content ? '/program' : s.sunday_program_url;
+      if (s.sunday_program_has_content) programLink.removeAttribute('target');
+      programLink.hidden = false;
+
+      const dateEl = document.getElementById('service-program-date');
+      if (dateEl && s.sunday_program_date) {
+        const d = new Date(s.sunday_program_date + 'T00:00:00');
+        if (!isNaN(d)) {
+          dateEl.textContent = 'Program for ' +
+            d.toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' });
+          dateEl.hidden = false;
+        }
+      }
+    }
     if (s.tagline) {
       const tEl = document.getElementById('hero-tagline');
       if (tEl) tEl.textContent = s.tagline;

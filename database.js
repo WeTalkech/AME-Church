@@ -16,7 +16,7 @@ async function seedDatabase() {
     ['phone',                  '(000) 000-0000'],
     ['email',                  'info@amestjosephs.org'],
     ['service_sunday_school',  '9:00 AM'],
-    ['service_sunday_morning', '11:00 AM'],
+    ['service_sunday_morning', '10:00 AM'],
     ['service_wednesday',      '7:00 PM'],
     ['facebook_url',           ''],
     ['youtube_url',            ''],
@@ -24,6 +24,9 @@ async function seedDatabase() {
     ['pastor_name',            'Reverend Raynol Deon Matthys'],
     ['pastor_bio',             'Our pastor leads our congregation with wisdom, compassion, and a deep commitment to the Gospel.'],
     ['founded_year',           ''],
+    ['sunday_program_url',     ''],
+    ['sunday_program_date',    ''],
+    ['sunday_program_content', ''],
   ];
 
   for (const [key, value] of defaults) {

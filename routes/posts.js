@@ -29,6 +29,17 @@ const upload = multer({
   }
 });
 
+// Multer — PDF uploads (Sunday service program)
+const uploadPdf = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.pdf' && file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only PDF files are allowed'));
+  }
+});
+
 // Email transporter
 const mailer = process.env.SMTP_HOST ? nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -194,10 +205,11 @@ router.get('/public/settings', async (req, res) => {
   for (const row of (rows || [])) all[row.key] = row.value;
   const { church_name, tagline, address, phone, email,
           service_sunday_school, service_sunday_morning, service_wednesday,
-          facebook_url, youtube_url } = all;
+          facebook_url, youtube_url, sunday_program_url, sunday_program_date } = all;
   res.json({ church_name, tagline, address, phone, email,
              service_sunday_school, service_sunday_morning, service_wednesday,
-             facebook_url, youtube_url });
+             facebook_url, youtube_url, sunday_program_url, sunday_program_date,
+             sunday_program_has_content: !!(all.sunday_program_content || '').trim() });
 });
 
 // POST /api/contact
@@ -420,6 +432,64 @@ router.post('/admin/upload', requireAuthAPI, (req, res) => {
 
     const { data: { publicUrl } } = supabase.storage.from('church-uploads').getPublicUrl(filename);
     res.json({ url: publicUrl });
+  });
+});
+
+// GET /api/program — public: the current Sunday service program
+router.get('/program', async (req, res) => {
+  const { data: rows } = await supabase.from('church_site_settings')
+    .select('key, value').in('key', ['sunday_program_url', 'sunday_program_date', 'sunday_program_content']);
+  const all = {};
+  for (const row of (rows || [])) all[row.key] = row.value;
+  res.json({
+    url:     all.sunday_program_url     || '',
+    date:    all.sunday_program_date    || '',
+    content: all.sunday_program_content || '',
+  });
+});
+
+// GET /api/admin/program — current Sunday service program
+router.get('/admin/program', requireAuthAPI, async (req, res) => {
+  const { data: rows } = await supabase.from('church_site_settings')
+    .select('key, value').in('key', ['sunday_program_url', 'sunday_program_date', 'sunday_program_content']);
+  const all = {};
+  for (const row of (rows || [])) all[row.key] = row.value;
+  res.json({
+    url:     all.sunday_program_url     || '',
+    date:    all.sunday_program_date    || '',
+    content: all.sunday_program_content || '',
+  });
+});
+
+// PUT /api/admin/program — set or clear the current program
+router.put('/admin/program', requireAuthAPI, async (req, res) => {
+  const { url, date, content } = req.body;
+  const updates = [
+    { key: 'sunday_program_url',     value: url     ? String(url)     : '' },
+    { key: 'sunday_program_date',    value: date    ? String(date)    : '' },
+    { key: 'sunday_program_content', value: content ? String(content) : '' },
+  ];
+  const { error } = await supabase.from('church_site_settings').upsert(updates, { onConflict: 'key' });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// POST /api/admin/upload-pdf — upload a PDF to Supabase Storage
+router.post('/admin/upload-pdf', requireAuthAPI, (req, res) => {
+  uploadPdf.single('file')(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filename = `pdf_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.pdf`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('church-uploads')
+      .upload(filename, req.file.buffer, { contentType: 'application/pdf', upsert: false });
+
+    if (uploadError) return res.status(500).json({ error: uploadError.message });
+
+    const { data: { publicUrl } } = supabase.storage.from('church-uploads').getPublicUrl(filename);
+    res.json({ url: publicUrl, name: req.file.originalname });
   });
 });
 
