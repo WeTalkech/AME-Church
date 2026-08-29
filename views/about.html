@@ -41,17 +41,19 @@
 <!-- Our Story -->
 <section style="background: var(--white);">
   <div class="container">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 60px; align-items: center;">
       <div>
         <span class="section-label">Our Story</span>
-        <h2 style="color: var(--purple-dark); margin: 12px 0 20px;">A Legacy of Faith & Service</h2>
-        <p id="about-text" style="color: var(--text-mid); line-height: 1.8; margin-bottom: 20px;">
-          A.M.E. ST. Joseph Church is a proud congregation of the African Methodist Episcopal Church, one of the oldest and most historic Black denominations in the United States. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action.
-        </p>
+        <h2 style="color: var(--purple-dark); margin: 12px 0 20px;">A Legacy of Faith &amp; Service</h2>
+        <div id="about-text" style="color: var(--text-mid); line-height: 1.8;">
+          <p style="margin-bottom: 20px;">St. Joseph AME Church is a proud congregation of the African Methodist Episcopal Church, established in 1933 in Paarl in the Western Cape of South Africa. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action.</p>
+          <p style="margin-bottom: 20px;">Establishing the AME church in Paarl started with a group of people that moved here. This group held worship services at the home of Sis. Rocky in Barbarossa Street. It appeared that the majority of these people were of African descent (black) and it is with great regret that it should be mentioned that they had to renounce their identity as such and was forced to adopt the identity of what was then known as The Cape Colored&rsquo;s.</p>
+          <p style="margin-bottom: 24px;">The first AME pastor appointed to this congregation was Rev. JSK Mothibi. When Rev. Mothibi was appointed to this congregation from Stellenbosch, the congregation in Paarl had no formal place of worship. Rev. Mothibi use to travel from Stellenbosch to Paarl by bicycle and later he travelled with his wife Rebecca Mothibi and children by train. After his wife died, Rev Mothibi inherited some monies from her estate and he used the money to buy property in Paarl. This property is situated in an area that was then known as Perdestal and it was bought from a Mr. Henry Rabie. This would also be the property on which the church is situated today. The Mothibi&rsquo;s donated the property to the AME church and used the remaining money to build a church and it was then known in the Paarl area as Klein Kerkie.</p>
+        </div>
         <a href="/contact" class="btn btn-purple">Get in Touch <i class="fa fa-arrow-right"></i></a>
       </div>
-      <div style="background: linear-gradient(135deg, var(--purple-mid), var(--purple-dark)); border-radius: var(--radius-xl); height: 380px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); font-size: 5rem;">
-        <i class="fa fa-church"></i>
+      <div>
+        <img src="/assets/history/church-building.jpg" alt="The St. Joseph A.M.E. Church building in Paarl" style="width: 100%; border-radius: var(--radius-xl); box-shadow: var(--shadow-md);" />
       </div>
     </div>
   </div>
@@ -106,9 +108,11 @@
       <div class="section-divider"><span class="section-divider-cross">✦</span></div>
     </div>
     <div style="max-width: 700px; margin: 0 auto; text-align: center;">
-      <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--purple-mid), var(--purple-dark)); display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 24px; color: rgba(255,255,255,0.5);">👤</div>
-      <h3 style="color: var(--purple-dark); margin-bottom: 8px;" id="pastor-name">Pastor Name</h3>
-      <p style="color: var(--gold-dark); font-weight: 600; margin-bottom: 20px;">Senior Pastor</p>
+      <img src="/assets/pastor/rev-and-mrs-matthys.jpg"
+           alt="Reverend Raynol Deon Matthys and Mrs Bernadette Matthys"
+           style="width: 100%; max-width: 420px; margin: 0 auto 28px; border-radius: var(--radius-xl); box-shadow: var(--shadow-md);" />
+      <h3 style="color: var(--purple-dark); margin-bottom: 8px;" id="pastor-name">Reverend Raynol Deon &amp; Mrs Bernadette Matthys</h3>
+      <p style="color: var(--gold-dark); font-weight: 600; margin-bottom: 20px;">Reverend</p>
       <p id="pastor-bio" style="color: var(--text-mid); line-height: 1.8;">Our pastor leads our congregation with wisdom, compassion, and a deep commitment to the Gospel.</p>
     </div>
   </div>

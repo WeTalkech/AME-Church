@@ -20,8 +20,8 @@ async function seedDatabase() {
     ['service_wednesday',      '7:00 PM'],
     ['facebook_url',           ''],
     ['youtube_url',            ''],
-    ['about_text',             "A.M.E. ST. Joseph Church is a proud congregation of the African Methodist Episcopal Church, one of the oldest and most historic Black denominations in the United States. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action."],
-    ['pastor_name',            'Pastor Name'],
+    ['about_text',             "St. Joseph AME Church is a proud congregation of the African Methodist Episcopal Church, established in 1933 in Paarl in the Western Cape of South Africa. Founded on the principles of freedom, justice, and the love of God, we are committed to nurturing spiritual growth, serving our community, and uplifting our members through faith, education, and action."],
+    ['pastor_name',            'Reverend Raynol Deon Matthys'],
     ['pastor_bio',             'Our pastor leads our congregation with wisdom, compassion, and a deep commitment to the Gospel.'],
     ['founded_year',           ''],
   ];
