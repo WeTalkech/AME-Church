@@ -46,7 +46,7 @@ async function loadHymns(search = '') {
       <tr>
         <td style="font-weight:700;color:var(--purple-mid);">${h.number}</td>
         <td style="font-weight:600;color:var(--text-dark);">${escHtml(h.title)}</td>
-        <td style="color:var(--text-light);">${escHtml(h.section || 'Hymns')}</td>
+        <td style="color:var(--text-light);">${escHtml(h.section || 'English')}</td>
         <td style="color:var(--text-light);">${escHtml(h.author || '—')}</td>
         <td>${h.lyrics
           ? '<span class="badge badge-published">Added</span>'
@@ -66,7 +66,7 @@ function openModal(hymn = null) {
   document.getElementById('f-number').value            = hymn ? hymn.number : '';
   document.getElementById('f-title').value             = hymn ? hymn.title  : '';
   document.getElementById('f-author').value            = hymn ? (hymn.author || '') : '';
-  document.getElementById('f-section').value            = hymn ? (hymn.section || 'Hymns') : (activeSection || 'Hymns');
+  document.getElementById('f-section').value            = hymn ? (hymn.section || 'English') : (activeSection || 'English');
   document.getElementById('f-lyrics').value            = hymn ? (hymn.lyrics || '') : '';
   document.getElementById('modal-error').style.display = 'none';
   document.getElementById('modal-overlay').classList.add('open');
@@ -87,7 +87,7 @@ async function saveHymn() {
   const number = document.getElementById('f-number').value.trim();
   const title  = document.getElementById('f-title').value.trim();
   const author = document.getElementById('f-author').value.trim();
-  const section = document.getElementById('f-section').value.trim() || 'Hymns';
+  const section = document.getElementById('f-section').value.trim() || 'English';
   const lyrics = document.getElementById('f-lyrics').value.trim();
   const errEl  = document.getElementById('modal-error');
 

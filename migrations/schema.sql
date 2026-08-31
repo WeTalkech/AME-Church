@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS church_hymns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 -- Each language section carries its own numbering, restarting at 1.
-ALTER TABLE church_hymns ADD COLUMN IF NOT EXISTS section TEXT NOT NULL DEFAULT 'Hymns';
+ALTER TABLE church_hymns ADD COLUMN IF NOT EXISTS section TEXT NOT NULL DEFAULT 'English';
 ALTER TABLE church_hymns DROP CONSTRAINT IF EXISTS church_hymns_number_key;
 CREATE UNIQUE INDEX IF NOT EXISTS church_hymns_number_section_key ON church_hymns (number, section);
 CREATE INDEX IF NOT EXISTS idx_church_hymns_number ON church_hymns (number);
@@ -113,7 +113,14 @@ ALTER TABLE church_hymns ADD COLUMN IF NOT EXISTS section_rank SMALLINT NOT NULL
 CREATE OR REPLACE FUNCTION church_hymns_set_section_rank()
 RETURNS TRIGGER AS $
 BEGIN
-  NEW.section_rank := CASE WHEN NEW.section = 'Hymns' THEN 0 ELSE 1 END;
+  NEW.section_rank := CASE NEW.section
+    WHEN 'English'   THEN 0
+    WHEN 'Afrikaans' THEN 1
+    WHEN 'isiXhosa'  THEN 2
+    WHEN 'Sesotho'   THEN 3
+    WHEN 'Nama'      THEN 4
+    ELSE 99
+  END;
   RETURN NEW;
 END;
 $ LANGUAGE plpgsql;

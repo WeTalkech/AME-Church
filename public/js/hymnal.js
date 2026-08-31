@@ -49,7 +49,7 @@ function renderList() {
   el.innerHTML = allHymns.map(h => `
     <div class="hymn-list-item${h.id === activeId ? ' active' : ''}" data-id="${h.id}" onclick="selectHymn(${h.id})">
       <span class="hymn-num">${h.number}</span>
-      <span class="hymn-name">${escHtml(h.title)}${mixed && h.section && h.section !== 'Hymns'
+      <span class="hymn-name">${escHtml(h.title)}${mixed && h.section && h.section !== 'English'
         ? ` <small style="color:var(--text-light);">· ${escHtml(h.section)}</small>` : ''}</span>
     </div>
   `).join('');
@@ -98,7 +98,7 @@ async function selectHymn(id) {
     ${backBtn()}
     <div class="hymnal-detail-scroll">
       <div class="hymnal-detail-inner">
-        <div class="hymn-detail-number">${hymn.section && hymn.section !== 'Hymns' ? escHtml(hymn.section) + ' No. ' : 'Hymn No. '}${hymn.number}</div>
+        <div class="hymn-detail-number">${hymn.section && hymn.section !== 'English' ? escHtml(hymn.section) + ' No. ' : 'Hymn No. '}${hymn.number}</div>
         <div class="hymn-detail-title">${escHtml(hymn.title)}</div>
         ${hymn.author ? `<div class="hymn-detail-author"><i class="fa fa-pen-nib" style="margin-right:6px;"></i>${escHtml(hymn.author)}</div>` : ''}
         ${hymn.lyrics

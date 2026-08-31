@@ -30,13 +30,16 @@ router.get('/hymns', async (req, res) => {
 
 // GET /api/hymn-sections — the language categories, with counts
 router.get('/hymn-sections', async (req, res) => {
-  const { data, error } = await supabase.from('church_hymns').select('section');
+  const { data, error } = await supabase.from('church_hymns').select('section, section_rank');
   if (error) return res.status(500).json({ error: error.message });
   const counts = {};
-  for (const row of (data || [])) counts[row.section] = (counts[row.section] || 0) + 1;
-  const sections = Object.entries(counts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => (a.name === 'Hymns' ? -1 : b.name === 'Hymns' ? 1 : a.name.localeCompare(b.name)));
+  for (const row of (data || [])) {
+    if (!counts[row.section]) counts[row.section] = { name: row.section, count: 0, rank: row.section_rank ?? 99 };
+    counts[row.section].count++;
+  }
+  const sections = Object.values(counts)
+    .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name))
+    .map(({ name, count }) => ({ name, count }));
   res.json({ sections });
 });
 
@@ -82,7 +85,7 @@ router.post('/admin/hymns', requireAuthAPI, async (req, res) => {
   const { data, error } = await supabase
     .from('church_hymns')
     .insert({ number: parseInt(number), title, author: author || null, lyrics: lyrics || null,
-              section: section || 'Hymns' })
+              section: section || 'English' })
     .select('id')
     .single();
 
