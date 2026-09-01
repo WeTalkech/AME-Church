@@ -3,6 +3,20 @@ const { supabase } = require('../database');
 const { requireAuthAPI } = require('../middleware/auth');
 const router = express.Router();
 
+// Build the search filter for a hymn query. A purely numeric term also matches
+// the hymn number exactly, so a hymn can be looked up the way it is called out
+// in a service. PostgREST reads or() as a comma-separated list, so its
+// delimiters are neutralised before interpolation. Apostrophes are deliberately
+// kept -- they are safe here and appear in Sesotho titles such as 'Mopi.
+function hymnSearchFilter(term) {
+  const raw  = String(term).trim();
+  const safe = raw.replace(/[,()\\"]/g, ' ').replace(/\s+/g, ' ').trim();
+  const filters = [];
+  if (/^\d{1,4}$/.test(raw)) filters.push(`number.eq.${parseInt(raw, 10)}`);
+  if (safe) filters.push(`title.ilike.%${safe}%`, `author.ilike.%${safe}%`);
+  return filters.length ? filters.join(',') : null;
+}
+
 // ============================================================
 // PUBLIC
 // ============================================================
@@ -20,7 +34,8 @@ router.get('/hymns', async (req, res) => {
 
   if (section) query = query.eq('section', section);
   if (search) {
-    query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
+    const filter = hymnSearchFilter(search);
+    if (filter) query = query.or(filter);
   }
 
   const { data, count, error } = await query;
@@ -70,7 +85,10 @@ router.get('/admin/hymns', requireAuthAPI, async (req, res) => {
     .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
   if (section) query = query.eq('section', section);
-  if (search) query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
+  if (search) {
+    const filter = hymnSearchFilter(search);
+    if (filter) query = query.or(filter);
+  }
 
   const { data, count, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
