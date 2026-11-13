@@ -13,7 +13,7 @@ async function seedDatabase() {
     ['tagline',                'Walking in Faith, Serving in Love'],
     ['address',                'Cnr of Bougaard and, Kearns St, Rabiesdale, Paarl, 7646'],
     ['phone',                  '(000) 000-0000'],
-    ['email',                  'info@amestjosephs.org'],
+    ['email',                  'st.josephamecpaarl@gmail.com'],
     ['service_sunday_school',  '9:00 AM'],
     ['service_sunday_morning', '10:00 AM'],
     ['service_wednesday',      '7:00 PM'],
