@@ -731,6 +731,22 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   margin-bottom: 4px;
 }
 
+/* ---- Making History ---- */
+/* Columns are sized to the two images' aspect ratios so they sit at equal height. */
+.making-history {
+  display: grid;
+  grid-template-columns: 1fr 1.78fr;
+  gap: 32px;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.making-history img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
   .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -747,6 +763,8 @@ textarea.form-control { resize: vertical; min-height: 120px; }
   .nav-toggle { display: flex; }
   .form-row { grid-template-columns: 1fr; }
   .hero-actions { flex-direction: column; align-items: center; }
+  .making-history { grid-template-columns: 1fr; gap: 24px; }
+  .making-history img:first-child { max-width: 400px; margin: 0 auto; }
 }
 @media (max-width: 600px) {
   .footer-grid { grid-template-columns: 1fr; }
